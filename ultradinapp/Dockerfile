@@ -1,34 +1,44 @@
-# Utilise l'image officielle PHP avec Apache pour Symfony 7.1 et PHP 8.2
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-# Installe les extensions PHP nécessaires pour Symfony et Composer
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libicu-dev \
-    libpq-dev \
+RUN apt update && apt install -y \
+    nano \
+    libpng-dev \
+    libjpeg-dev \
     libzip-dev \
-    && docker-php-ext-install intl pdo pdo_mysql zip opcache
+    libfreetype6-dev \
+    libonig-dev \
+    libxslt1-dev \
+    unzip \
+    build-essential \
+    git \
+    nginx \
+    libssl-dev \
+    default-mysql-client \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-enable opcache \
+    && docker-php-ext-install xsl \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install intl \
+    && docker-php-ext-install soap \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb
 
-# Active le module Apache Rewrite (indispensable pour Symfony)
-RUN a2enmod rewrite
+RUN docker-php-ext-install  pdo_mysql \
+    && docker-php-ext-enable pdo_mysql
 
-# Installe Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY docker/php/conf.d/* /usr/local/etc/php/conf.d/
 
-# Définit le répertoire de travail
-WORKDIR /var/www/html
+COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Copie les fichiers (sauf ceux montés en volume) et installe les dépendances
-COPY . /var/www/html
+WORKDIR /var/www
+
+COPY . .
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+
 RUN composer install
 
-# Définit les permissions pour permettre l’écriture dans le dossier de cache et de logs
-RUN chown -R www-data:www-data /var/www/html/var
-
-# Définit les variables d'environnement pour le mode développement
-ENV APP_ENV=dev
-ENV APP_DEBUG=1
-
-# Expose le port 80 pour accéder à l'application Symfony via Apache
-EXPOSE 80
+EXPOSE 9000
+CMD ["php-fpm"]
