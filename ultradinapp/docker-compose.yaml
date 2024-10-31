@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html  # Monte le dossier courant en volume
+      - ./var:/var/www/html/var  # Garde les dossiers de cache et logs en volume
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+    networks:
+      - symfony-network
+
+networks:
+  symfony-network:
+    driver: bridge
