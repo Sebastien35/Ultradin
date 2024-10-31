@@ -28,11 +28,7 @@ RUN docker-php-ext-install  pdo_mysql \
     && docker-php-ext-enable pdo_mysql
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-COPY docker/php/conf.d/* /usr/local/etc/php/conf.d/
 
-COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
-
-WORKDIR /var/www
 
 COPY . .
 
