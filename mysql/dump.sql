@@ -1,3 +1,8 @@
+CREATE DATABASE IF NOT EXISTS ultradin;
+USE ultradin;
+
+
+
 CREATE TABLE product(
    id_product INT,
    name VARCHAR(50) NOT NULL,
@@ -13,12 +18,14 @@ CREATE TABLE product(
    UNIQUE(name)
 );
 
+
 CREATE TABLE category(
    id_category INT,
    name VARCHAR(50) NOT NULL,
    PRIMARY KEY(id_category),
    UNIQUE(name)
 );
+
 
 CREATE TABLE cart(
    id_cart INT,
@@ -28,6 +35,7 @@ CREATE TABLE cart(
    PRIMARY KEY(id_cart)
 );
 
+DROP TABLE IF EXISTS users;
 CREATE TABLE users(
    id_user INT,
    email VARCHAR(320) NOT NULL,
@@ -41,6 +49,7 @@ CREATE TABLE users(
    UNIQUE(cellphone)
 );
 
+DROP TABLE IF EXISTS country_iso3;
 CREATE TABLE country_iso3(
    id_country INT,
    iso3 VARCHAR(3) NOT NULL,
