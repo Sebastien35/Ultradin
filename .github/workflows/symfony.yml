@@ -28,7 +28,7 @@ jobs:
       
     - name: Copy .env.test.local
       run: |
-        cd back
+        cd ultradinapp
         php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
     - name: Cache Composer packages
       id: composer-cache
