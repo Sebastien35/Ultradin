@@ -56,7 +56,7 @@ class SecurityController extends AbstractController
         }
 
         $token = $this->jwtManager->create($user);
-
+        error_log($token);  
         return new JsonResponse(['token' => $token]);
     }
 
