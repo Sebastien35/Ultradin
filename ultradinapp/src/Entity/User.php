@@ -15,7 +15,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
+    private ?int $id_user = null;
 
     #[ORM\Column(length: 180)]
     private ?string $email = null;
@@ -63,7 +63,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[ORM\Column(type: 'integer')]
-    private int $default_payment_method;
+    private ?int $default_payment_method;
 
     public function getDefaultPaymentMethod(): int
     {
@@ -78,7 +78,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id_user;
     }
 
     public function getEmail(): ?string
