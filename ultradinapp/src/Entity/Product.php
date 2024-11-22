@@ -47,14 +47,14 @@ class Product
     private ?\DateTimeInterface $date_updated = null;
 
     /**
-     * @var Collection<int, category>
+     * @var Collection<int, Category>
      */
-    #[ORM\ManyToMany(targetEntity: category::class, inversedBy: 'products')]
-    private Collection $category_id;
+    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
+    private Collection $Category_id;
 
     public function __construct()
     {
-        $this->category_id = new ArrayCollection();
+        $this->Category_id = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -183,25 +183,25 @@ class Product
     }
 
     /**
-     * @return Collection<int, category>
+     * @return Collection<int, Category>
      */
     public function getCategoryId(): Collection
     {
-        return $this->category_id;
+        return $this->Category_id;
     }
 
-    public function addCategoryId(category $categoryId): static
+    public function addCategoryId(Category $CategoryId): static
     {
-        if (!$this->category_id->contains($categoryId)) {
-            $this->category_id->add($categoryId);
+        if (!$this->Category_id->contains($CategoryId)) {
+            $this->Category_id->add($CategoryId);
         }
 
         return $this;
     }
 
-    public function removeCategoryId(category $categoryId): static
+    public function removeCategoryId(Category $CategoryId): static
     {
-        $this->category_id->removeElement($categoryId);
+        $this->Category_id->removeElement($CategoryId);
 
         return $this;
     }
