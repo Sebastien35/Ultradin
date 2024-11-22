@@ -36,10 +36,9 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'api_login', methods: ['POST'])]
     public function login(Request $request, UserProviderInterface $userProvider): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        $email = $data['email'] ?? null;
-        $password = $data['password'] ?? null;
+        $data       = json_decode($request->getContent(), true);
+        $email      = $data['email'] ?? null;
+        $password   = $data['password'] ?? null;
 
         if (!$email || !$password) {
             return new JsonResponse(['error' => 'Email and password are required.'], JsonResponse::HTTP_BAD_REQUEST);
@@ -50,11 +49,9 @@ class SecurityController extends AbstractController
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Invalid login credentials.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
-
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
             return new JsonResponse(['error' => 'Invalid login credentials.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
-
         $token = $this->jwtManager->create($user);
         error_log($token);  
         return new JsonResponse(['token' => $token]);
@@ -68,7 +65,7 @@ class SecurityController extends AbstractController
 
     #[Route(path: '/register', name: 'app_register', methods: ['POST'])]
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager): JsonResponse
-    {   
+    {
         $data = json_decode($request->getContent(), true);
         if (empty($data['email']) || empty($data['password'])) {
             return new JsonResponse(['error' => 'Email and password are required'], JsonResponse::HTTP_BAD_REQUEST);
@@ -92,6 +89,21 @@ class SecurityController extends AbstractController
         $entityManager->flush();
 
         return new JsonResponse(['message' => 'User registered successfully'], JsonResponse::HTTP_CREATED);
+    }
+
+    #[Route(path: '/refresh', name: 'app_refresh', methods: ['POST'])]
+    public function refresh(request $request): JsonResponse
+    {
+        $refreshToken = $request->get('refresh_token');
+        if (!$refreshToken) {
+            return new JsonResponse(['error' => 'Refresh token is required'], 400);
+        }
+        $user = $this->getUser();
+        if(!$user) {
+            return new JsonResponse(['error' => 'User not found'], 404);
+        }
+        $newJwt = $this->jwtManager->create($user);
+        return new JsonResponse(['token' => $newJwt]);
     }
 
 }
