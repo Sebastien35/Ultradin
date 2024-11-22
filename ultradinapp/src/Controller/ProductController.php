@@ -10,7 +10,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
 use Exception;
 use Symfony\Component\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
 use Symfony\Component\Serializer\SerializerInterface;
+
 
 
 #[Route('/products', name: 'app_products_')]
@@ -24,7 +26,7 @@ class ProductController extends AbstractController
     }
 
     #[Route('/create', name:'create')]
-    public function  createProduct(Request $request){
+    public function  createProduct(HttpFoundationRequest $request){
         $data = json_decode($request->getContent(), true);
         if (!$data) {
             return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
@@ -71,6 +73,22 @@ class ProductController extends AbstractController
         }
         $jsonProducts = $serializer->serialize($products, 'json');
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+    }
+
+    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
+    public function deleteById(int $id): JsonResponse
+    {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+        try {
+            $this->entityManager->remove($product);
+            $this->entityManager->flush();
+            return new JsonResponse(['message' => 'Product deleted successfully'], 200);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Failed to delete product', 'details' => $e->getMessage()], 500);
+        }
     }
 
 

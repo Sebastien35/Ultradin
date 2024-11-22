@@ -15,7 +15,6 @@ class ProductFixtures extends Fixture
 
         for ($i = 1; $i <= 50; $i++) {
             $product = new Product();
-            $product->setIdProduct($i); // Simulated unique ID
             $product->setName($faker->company . ' SaaS Security');
             $product->setDescription($faker->sentence(10));
             $product->setImageUrl($faker->imageUrl(320, 240, 'technology', true, 'Cybersecurity'));

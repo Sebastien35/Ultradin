@@ -14,9 +14,6 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column]
     private ?int $id_product = null;
 
     #[ORM\Column(length: 255)]
@@ -46,32 +43,11 @@ class Product
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_updated = null;
 
-    /**
-     * @var Collection<int, Category>
-     */
-    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
-    private Collection $Category_id;
-
-    public function __construct()
-    {
-        $this->Category_id = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    
 
     public function getIdProduct(): ?int
     {
         return $this->id_product;
-    }
-
-    public function setIdProduct(int $id_product): static
-    {
-        $this->id_product = $id_product;
-
-        return $this;
     }
 
     public function getName(): ?string
@@ -182,27 +158,5 @@ class Product
         return $this;
     }
 
-    /**
-     * @return Collection<int, Category>
-     */
-    public function getCategoryId(): Collection
-    {
-        return $this->Category_id;
-    }
-
-    public function addCategoryId(Category $CategoryId): static
-    {
-        if (!$this->Category_id->contains($CategoryId)) {
-            $this->Category_id->add($CategoryId);
-        }
-
-        return $this;
-    }
-
-    public function removeCategoryId(Category $CategoryId): static
-    {
-        $this->Category_id->removeElement($CategoryId);
-
-        return $this;
-    }
+    
 }

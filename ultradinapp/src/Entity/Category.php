@@ -13,9 +13,6 @@ class Category
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column]
     private ?int $id_category = null;
 
     #[ORM\Column(length: 255)]
@@ -34,7 +31,7 @@ class Category
 
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->id_category;
     }
 
     public function getIdCategory(): ?int
@@ -61,30 +58,5 @@ class Category
         return $this;
     }
 
-    /**
-     * @return Collection<int, Product>
-     */
-    public function getProducts(): Collection
-    {
-        return $this->products;
-    }
-
-    public function addProduct(Product $product): static
-    {
-        if (!$this->products->contains($product)) {
-            $this->products->add($product);
-            $product->addCategoryId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduct(Product $product): static
-    {
-        if ($this->products->removeElement($product)) {
-            $product->removeCategoryId($this);
-        }
-
-        return $this;
-    }
+    
 }
