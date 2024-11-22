@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: database
+      MYSQL_DATABASE: ultradindb
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
