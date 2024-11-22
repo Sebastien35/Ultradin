@@ -27,8 +27,9 @@ jobs:
     - uses: actions/checkout@v3
       
     - name: Copy .env.test.local
-      run: cd ultradinapp
-      run: php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
+      run: |
+        cd back
+        php -r "file_exists('.env.test.local') || copy('.env.test', '.env.test.local');"
     - name: Cache Composer packages
       id: composer-cache
       uses: actions/cache@v3
