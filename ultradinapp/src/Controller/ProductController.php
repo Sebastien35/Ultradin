@@ -12,6 +12,7 @@ use Exception;
 use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 
 
@@ -45,7 +46,7 @@ class ProductController extends AbstractController
         $this->entityManager->flush();
         return $this->json([
             'message' => 'Product created successfully',
-            'id' => $product->getId(),
+            'id' => $product->getIdProduct(),
         ], Response::HTTP_CREATED);
         } catch (Exception $e){
             return $e->getMessage();
@@ -53,15 +54,54 @@ class ProductController extends AbstractController
     }
 
 
-    #[Route('/{id}', name: 'id', requirements: ['id' => '\d+'])]
-    public function getProductById(int $id, SerializerInterface $serializer): Response
-    {
+    #[Route('/{id}', name: 'id', requirements: ['id' => '\d+'], methods: ['GET', 'DELETE', 'PUT'])]
+    public function getProductById(
+        int $id,
+        SerializerInterface $serializer,
+        HttpFoundationRequest $request,
+        AuthorizationCheckerInterface $authorizationChecker
+    ): Response {
         $product = $this->entityManager->getRepository(Product::class)->find($id);
+
         if (!$product) {
-            throw $this->createNotFoundException('Product not found');
+            return new JsonResponse(['error' => 'Product not found'], 404);
         }
-        $jsonContent = $serializer->serialize($product, 'json');
-        return new Response($jsonContent, 200, ['Content-Type' => 'application/json']);
+
+        switch ($request->getMethod()) {
+            case 'GET':
+                $jsonProduct = $serializer->serialize($product, 'json');
+                return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
+
+            case 'DELETE':
+                if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
+                    return new JsonResponse(['error' => 'Access denied'], 403);
+                }
+                $this->entityManager->remove($product);
+                $this->entityManager->flush();
+                return new JsonResponse(['message' => 'Product deleted successfully'], 200);
+
+            case 'PUT':
+                if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
+                    return new JsonResponse(['error' => 'Access denied'], 403);
+                }
+                $data = json_decode($request->getContent(), true);
+                if (!$data) {
+                    return new JsonResponse(['error' => 'Invalid JSON'], 400);
+                }
+                $product->setName($data['name'] ?? $product->getName());
+                $product->setDescription($data['description'] ?? $product->getDescription());
+                $product->setImageUrl($data['image_url'] ?? $product->getImageUrl());
+                $product->setPrice($data['price'] ?? $product->getPrice());
+                $product->setStock($data['stock'] ?? $product->getStock());
+                $product->setAvailability($data['availability'] ?? $product->isAvailable());
+                $product->setTechnicalFeatures($data['tech_features'] ?? $product->getTechnicalFeatures());
+                $this->entityManager->persist($product);
+                $this->entityManager->flush();
+                return new JsonResponse(['message' => 'Product updated successfully'], 200);
+
+            default:
+                return new JsonResponse(['error' => 'Method not allowed'], 405);
+        }
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
@@ -75,21 +115,7 @@ class ProductController extends AbstractController
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }
 
-    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
-    public function deleteById(int $id): JsonResponse
-    {
-        $product = $this->entityManager->getRepository(Product::class)->find($id);
-        if (!$product) {
-            throw $this->createNotFoundException('Product not found');
-        }
-        try {
-            $this->entityManager->remove($product);
-            $this->entityManager->flush();
-            return new JsonResponse(['message' => 'Product deleted successfully'], 200);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Failed to delete product', 'details' => $e->getMessage()], 500);
-        }
-    }
+    
 
 
 

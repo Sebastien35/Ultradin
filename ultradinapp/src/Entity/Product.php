@@ -122,7 +122,7 @@ class Product
         return $this;
     }
 
-    public function isAvailability(): ?bool
+    public function isAvailable(): ?bool
     {
         return $this->availability;
     }
