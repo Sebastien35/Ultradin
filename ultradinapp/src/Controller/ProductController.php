@@ -62,16 +62,13 @@ class ProductController extends AbstractController
         AuthorizationCheckerInterface $authorizationChecker
     ): Response {
         $product = $this->entityManager->getRepository(Product::class)->find($id);
-
         if (!$product) {
             return new JsonResponse(['error' => 'Product not found'], 404);
         }
-
         switch ($request->getMethod()) {
             case 'GET':
                 $jsonProduct = $serializer->serialize($product, 'json');
                 return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
-
             case 'DELETE':
                 if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
                     return new JsonResponse(['error' => 'Access denied'], 403);
@@ -79,7 +76,6 @@ class ProductController extends AbstractController
                 $this->entityManager->remove($product);
                 $this->entityManager->flush();
                 return new JsonResponse(['message' => 'Product deleted successfully'], 200);
-
             case 'PUT':
                 if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
                     return new JsonResponse(['error' => 'Access denied'], 403);
@@ -98,7 +94,6 @@ class ProductController extends AbstractController
                 $this->entityManager->persist($product);
                 $this->entityManager->flush();
                 return new JsonResponse(['message' => 'Product updated successfully'], 200);
-
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
@@ -114,9 +109,5 @@ class ProductController extends AbstractController
         $jsonProducts = $serializer->serialize($products, 'json');
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }
-
-    
-
-
 
 }
