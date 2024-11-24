@@ -5,6 +5,10 @@ namespace App\Repository;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
+use PHPUnit\Util\Json;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -16,28 +20,34 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    //    /**
-    //     * @return Product[] Returns an array of Product objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function updateProduct(array $data, Product $product): JsonResponse
+{
+    try {
+        if (empty($data['name']) || !isset($data['price'], $data['stock'], $data['availability'])) {
+            return new JsonResponse([
+                'error' => 'Missing required fields: name, price, stock, or availability',
+            ], Response::HTTP_BAD_REQUEST);
+        }
 
-    //    public function findOneBySomeField($value): ?Product
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $product->setName($data['name'] ?? $product->getName());
+        $product->setDescription($data['description'] ?? $product->getDescription());
+        $product->setImageUrl($data['image_url'] ?? $product->getImageUrl());
+        $product->setPrice((float) $data['price'] ?? $product->getPrice());
+        $product->setStock((int) $data['stock'] ?? $product->getStock());
+        $product->setAvailability((bool) $data['availability'] ?? $product->isAvailable());
+        $product->setTechnicalFeatures($data['tech_features'] ?? $product->getTechnicalFeatures());
+
+        $this->getEntityManager()->persist($product);
+        $this->getEntityManager()->flush();
+
+        return new JsonResponse([
+            'message' => 'Product updated successfully',
+            'id' => $product->getIdProduct(),
+        ], Response::HTTP_OK);
+    } catch (Exception $e) {
+        return new JsonResponse([
+            'error' => 'An error occurred while updating the product: ' . $e->getMessage(),
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
 }

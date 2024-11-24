@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Exception;
 use Symfony\Component\BrowserKit\Request;
 use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
@@ -59,41 +60,31 @@ class ProductController extends AbstractController
         int $id,
         SerializerInterface $serializer,
         HttpFoundationRequest $request,
-        AuthorizationCheckerInterface $authorizationChecker
+        AuthorizationCheckerInterface $authorizationChecker,
+        ProductRepository $productRepository
     ): Response {
         $product = $this->entityManager->getRepository(Product::class)->find($id);
         if (!$product) {
             return new JsonResponse(['error' => 'Product not found'], 404);
         }
-        switch ($request->getMethod()) {
+        $method = $request->getMethod();
+        if($method != 'GET' && !$authorizationChecker->isGranted('ROLE_ADMIN')){
+            return new JsonResponse(['error' => 'Access denied'], 403);
+        }
+        switch ($method) {
             case 'GET':
                 $jsonProduct = $serializer->serialize($product, 'json');
                 return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
             case 'DELETE':
-                if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
-                    return new JsonResponse(['error' => 'Access denied'], 403);
-                }
                 $this->entityManager->remove($product);
                 $this->entityManager->flush();
                 return new JsonResponse(['message' => 'Product deleted successfully'], 200);
             case 'PUT':
-                if (!$authorizationChecker->isGranted('ROLE_ADMIN')) {
-                    return new JsonResponse(['error' => 'Access denied'], 403);
-                }
                 $data = json_decode($request->getContent(), true);
                 if (!$data) {
                     return new JsonResponse(['error' => 'Invalid JSON'], 400);
                 }
-                $product->setName($data['name'] ?? $product->getName());
-                $product->setDescription($data['description'] ?? $product->getDescription());
-                $product->setImageUrl($data['image_url'] ?? $product->getImageUrl());
-                $product->setPrice($data['price'] ?? $product->getPrice());
-                $product->setStock($data['stock'] ?? $product->getStock());
-                $product->setAvailability($data['availability'] ?? $product->isAvailable());
-                $product->setTechnicalFeatures($data['tech_features'] ?? $product->getTechnicalFeatures());
-                $this->entityManager->persist($product);
-                $this->entityManager->flush();
-                return new JsonResponse(['message' => 'Product updated successfully'], 200);
+                return $productRepository->updateProduct($data, $product);
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
