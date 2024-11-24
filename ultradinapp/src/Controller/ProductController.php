@@ -76,14 +76,9 @@ class ProductController extends AbstractController
                 $jsonProduct = $serializer->serialize($product, 'json');
                 return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
             case 'DELETE':
-                $this->entityManager->remove($product);
-                $this->entityManager->flush();
-                return new JsonResponse(['message' => 'Product deleted successfully'], 200);
+                return $productRepository->deleteProduct($product);
             case 'PUT':
                 $data = json_decode($request->getContent(), true);
-                if (!$data) {
-                    return new JsonResponse(['error' => 'Invalid JSON'], 400);
-                }
                 return $productRepository->updateProduct($data, $product);
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);

@@ -21,7 +21,7 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     public function updateProduct(array $data, Product $product): JsonResponse
-{
+    {
     try {
         if (empty($data['name']) || !isset($data['price'], $data['stock'], $data['availability'])) {
             return new JsonResponse([
@@ -44,10 +44,25 @@ class ProductRepository extends ServiceEntityRepository
             'message' => 'Product updated successfully',
             'id' => $product->getIdProduct(),
         ], Response::HTTP_OK);
-    } catch (Exception $e) {
-        return new JsonResponse([
-            'error' => 'An error occurred while updating the product: ' . $e->getMessage(),
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+        } catch (Exception $e) {
+            return new JsonResponse([
+                'error' => 'An error occurred while updating the product: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
-}
+
+    public function deleteProduct(Product $product){
+        try{
+        $this->getEntityManager()->remove($product);
+        $this->getEntityManager()->flush();
+        return new JsonResponse([
+            'message' => 'Product deleted successfully',
+        ], Response::HTTP_OK);
+        } catch (Exception $e){
+            return new JsonResponse([
+                'error' => 'An error occurred while deleting the product: ' . $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
