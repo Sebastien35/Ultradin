@@ -1,4 +1,4 @@
-const { series } = require('gulp');
+const { series, task } = require('gulp');
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').exec;
@@ -61,5 +61,40 @@ function setPermissions(cb) {
   }
 }
 
-// Default task to run all tasks in sequence
+
+task('keygen', series(createJwtDir, generatePrivateKey, generatePublicKey, setPermissions));
+
+
+const ultradinAppDir = path.join(__dirname, 'ultradinapp');
+
+// Task to navigate to the Ultradin app directory and run migrations
+function runMigrations(cb) {
+  exec(`cd ${ultradinAppDir} && php bin/console doctrine:migration:migrate --no-interaction`, (err, stdout, stderr) => {
+    console.log(stdout);
+    console.error(stderr);
+
+    if (stdout.includes('No migrations to execute.') || stdout.includes('Migrations are up to date')) {
+      console.log('Migrations are up to date.');
+      cb();
+    } else if (stderr.includes('SQLSTATE[42S01]')) {
+      console.warn('Migration error: Table already exists. Skipping migration.');
+      cb(); // Consider this non-critical and continue
+    } else {
+      cb(err);
+    }
+  });
+}
+
+// Task to load fixtures
+function loadFixtures(cb) {
+  exec(`cd ${ultradinAppDir} && php bin/console doctrine:fixtures:load --append --no-interaction`, (err, stdout, stderr) => {
+    console.log(stdout);
+    console.error(stderr);
+    cb(err);
+  });
+}
+
+// Define the `migrate-fixtures` task
+task('mif', series(runMigrations, loadFixtures));
+
 exports.default = series(createJwtDir, generatePrivateKey, generatePublicKey, setPermissions);
