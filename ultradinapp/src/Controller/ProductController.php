@@ -10,10 +10,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Exception;
-use Symfony\Component\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use App\Entity\Category;
+use App\Repository\CategoryRepository;
 
 
 
@@ -54,6 +56,17 @@ class ProductController extends AbstractController
         }
     }
 
+    #[Route('/all', name: 'all', methods: ['GET'])]
+    public function getAllProducts(SerializerInterface $serializer): JsonResponse
+    {
+        $products = $this->entityManager->getRepository(Product::class)->findAll();
+        if (!$products) {
+            return new JsonResponse(['error' => 'No products found'], 404);
+        }
+        $jsonProducts = $serializer->serialize($products, 'json');
+        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+    }
+
 
     #[Route('/{id}', name: 'id', requirements: ['id' => '\d+'], methods: ['GET', 'DELETE', 'PUT'])]
     public function getProductById(
@@ -85,15 +98,51 @@ class ProductController extends AbstractController
         }
     }
 
-    #[Route('/all', name: 'all', methods: ['GET'])]
-    public function getAllProducts(SerializerInterface $serializer): JsonResponse
-    {
-        $products = $this->entityManager->getRepository(Product::class)->findAll();
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function searchProduct(
+        HttpFoundationRequest $request,
+        SerializerInterface $serializer
+    ): Response {
+        $name = $request->query->get('name');
+        if (!$name) {
+            return new JsonResponse(['error' => 'Name parameter is required'], 400);
+        }
+        $products = $this->entityManager->getRepository(Product::class)->findBy(['name' => $name]);
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
         $jsonProducts = $serializer->serialize($products, 'json');
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }
+
+
+    
+    #[Route('/categories', name: 'categories', methods: ['GET'])]
+    public function getProductsByCategories(
+        Request $request,
+        ProductRepository $productRepository
+    ): Response {
+        // Retrieve category names from the query string
+        $categoryNames = $request->query->all('names'); // Example: ?names[]=category1&names[]=category2
+        if (!is_array($categoryNames)) {
+            $categoryNames = [$categoryNames];
+        }
+
+        if (empty($categoryNames)) {
+            return $this->json(['error' => 'No categories provided.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Fetch products matching all the given categories
+        $products = $productRepository->findByCategories($categoryNames);
+
+        if (empty($products)) {
+            return $this->json(['error' => 'No products found for the specified categories.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($products);
+    }
+
+
+    
 
 }

@@ -36,6 +36,7 @@ class ProductRepository extends ServiceEntityRepository
         $product->setStock((int) $data['stock'] ?? $product->getStock());
         $product->setAvailability((bool) $data['availability'] ?? $product->isAvailable());
         $product->setTechnicalFeatures($data['tech_features'] ?? $product->getTechnicalFeatures());
+        $product->addCategory($data['category'] ?? $product->getCategory());
 
         $this->getEntityManager()->persist($product);
         $this->getEntityManager()->flush();
@@ -64,5 +65,33 @@ class ProductRepository extends ServiceEntityRepository
                 'error' => 'An error occurred while deleting the product: ' . $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function findByCategories(array $categories): array
+    {
+        $entityManager = $this->getEntityManager();
+        $query = $entityManager->createQuery(
+        'SELECT p
+            FROM App\Entity\Product p
+            JOIN p.category c
+            WHERE c.name IN (:categories)
+            GROUP BY p.id_product
+            HAVING COUNT(DISTINCT c.id_category) = :categoryCount'
+        )
+        ->setParameter('categories', $categories)
+        ->setParameter('categoryCount', count($categories));
+        $products = $query->getResult();
+        return array_map(function ($product) {
+            return [
+                'id' => $product->getIdProduct(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'price' => $product->getPrice(),
+                'categories' => array_map(
+                    fn($category) => $category->getName(),
+                    $product->getCategory()->toArray()
+                ),
+            ];
+        }, $products);
     }
 }
