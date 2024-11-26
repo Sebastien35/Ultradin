@@ -1,27 +1,25 @@
 <?php
-
 namespace App\Entity;
 
 use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\MaxDepth;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 class Category
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: "id_category", type: "integer")]
     private ?int $id_category = null;
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    /**
-     * @var Collection<int, Product>
-     */
-    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'category_id')]
+    #[ORM\ManyToMany(targetEntity: Product::class, mappedBy: 'category')]
+    #[MaxDepth(1)]
     private Collection $products;
 
     public function __construct()
@@ -29,21 +27,9 @@ class Category
         $this->products = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id_category;
-    }
-
     public function getIdCategory(): ?int
     {
         return $this->id_category;
-    }
-
-    public function setIdCategory(int $id_category): static
-    {
-        $this->id_category = $id_category;
-
-        return $this;
     }
 
     public function getName(): ?string
@@ -58,5 +44,30 @@ class Category
         return $this;
     }
 
-    
+    /**
+     * @return Collection<int, Product>
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): static
+    {
+        if (!$this->products->contains($product)) {
+            $this->products->add($product);
+            $product->addCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): static
+    {
+        if ($this->products->removeElement($product)) {
+            $product->removeCategory($this);
+        }
+
+        return $this;
+    }
 }

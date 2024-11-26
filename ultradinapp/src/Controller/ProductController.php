@@ -8,10 +8,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Exception;
-use Symfony\Component\BrowserKit\Request;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Request as HttpFoundationRequest;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use App\Entity\Category;
+use App\Repository\CategoryRepository;
 
 
 
@@ -45,23 +49,11 @@ class ProductController extends AbstractController
         $this->entityManager->flush();
         return $this->json([
             'message' => 'Product created successfully',
-            'id' => $product->getId(),
+            'id' => $product->getIdProduct(),
         ], Response::HTTP_CREATED);
         } catch (Exception $e){
             return $e->getMessage();
         }
-    }
-
-
-    #[Route('/{id}', name: 'id', requirements: ['id' => '\d+'])]
-    public function getProductById(int $id, SerializerInterface $serializer): Response
-    {
-        $product = $this->entityManager->getRepository(Product::class)->find($id);
-        if (!$product) {
-            throw $this->createNotFoundException('Product not found');
-        }
-        $jsonContent = $serializer->serialize($product, 'json');
-        return new Response($jsonContent, 200, ['Content-Type' => 'application/json']);
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
@@ -75,22 +67,82 @@ class ProductController extends AbstractController
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }
 
-    #[Route('/delete/{id}', name: 'delete', methods: ['DELETE'])]
-    public function deleteById(int $id): JsonResponse
-    {
+
+    #[Route('/{id}', name: 'id', requirements: ['id' => '\d+'], methods: ['GET', 'DELETE', 'PUT'])]
+    public function getProductById(
+        int $id,
+        SerializerInterface $serializer,
+        HttpFoundationRequest $request,
+        AuthorizationCheckerInterface $authorizationChecker,
+        ProductRepository $productRepository
+    ): Response {
         $product = $this->entityManager->getRepository(Product::class)->find($id);
         if (!$product) {
-            throw $this->createNotFoundException('Product not found');
+            return new JsonResponse(['error' => 'Product not found'], 404);
         }
-        try {
-            $this->entityManager->remove($product);
-            $this->entityManager->flush();
-            return new JsonResponse(['message' => 'Product deleted successfully'], 200);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Failed to delete product', 'details' => $e->getMessage()], 500);
+        $method = $request->getMethod();
+        if($method != 'GET' && !$authorizationChecker->isGranted('ROLE_ADMIN')){
+            return new JsonResponse(['error' => 'Access denied'], 403);
+        }
+        switch ($method) {
+            case 'GET':
+                $jsonProduct = $serializer->serialize($product, 'json');
+                return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
+            case 'DELETE':
+                return $productRepository->deleteProduct($product);
+            case 'PUT':
+                $data = json_decode($request->getContent(), true);
+                return $productRepository->updateProduct($data, $product);
+            default:
+                return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
     }
 
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function searchProduct(
+        HttpFoundationRequest $request,
+        SerializerInterface $serializer
+    ): Response {
+        $name = $request->query->get('name');
+        if (!$name) {
+            return new JsonResponse(['error' => 'Name parameter is required'], 400);
+        }
+        $products = $this->entityManager->getRepository(Product::class)->findBy(['name' => $name]);
+        if (!$products) {
+            return new JsonResponse(['error' => 'No products found'], 404);
+        }
+        $jsonProducts = $serializer->serialize($products, 'json');
+        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+    }
 
+
+    
+    #[Route('/categories', name: 'categories', methods: ['GET'])]
+    public function getProductsByCategories(
+        Request $request,
+        ProductRepository $productRepository
+    ): Response {
+        // Retrieve category names from the query string
+        $categoryNames = $request->query->all('names'); // Example: ?names[]=category1&names[]=category2
+        if (!is_array($categoryNames)) {
+            $categoryNames = [$categoryNames];
+        }
+
+        if (empty($categoryNames)) {
+            return $this->json(['error' => 'No categories provided.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Fetch products matching all the given categories
+        $products = $productRepository->findByCategories($categoryNames);
+
+        if (empty($products)) {
+            return $this->json(['error' => 'No products found for the specified categories.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->json($products);
+    }
+
+
+    
 
 }
