@@ -71,4 +71,19 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ];
         return $user_f;
     }
+
+    public function createAdminUser($data){
+        if(!isset($data['email']) || !isset($data['phone']) || !isset($data['password'])){
+            throw new \InvalidArgumentException('Missing required fields');
+        }
+        $user = new User();
+        $user->setEmail($data['email']);
+        $user->setPhone($data['phone']);
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword(password_hash($data['password'], PASSWORD_DEFAULT));
+        $user->setCreatedAt(new \DateTime());
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+        return $user;
+    }
 }

@@ -70,4 +70,21 @@ class UserController extends AbstractController
 
         }
     }
+
+    #[Route('/create-admin', name: 'create', methods: ['POST'])]
+    public function createAdminUser(Request $request, AuthorizationCheckerInterface $authCheck, UserRepository $userRepository): JsonResponse{
+        if (!$authCheck->isGranted('ROLE_ADMIN')) {
+            return $this->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
+        }
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+            return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
+        }
+        try{
+            $userRepository->createAdminUser($data);
+            return $this->json(['message' => 'User created successfully'], Response::HTTP_CREATED);
+        } catch (\Exception $e) {
+            return $this->json(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
+    }
 }
