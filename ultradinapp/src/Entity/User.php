@@ -67,16 +67,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer', nullable:true)]
     private ?int $default_payment_method;
 
-    /**
-     * @var Collection<int, UserAddress>
-     */
-    #[ORM\OneToMany(targetEntity: UserAddress::class, mappedBy: 'user', orphanRemoval: true)]
-    private Collection $userAddresses;
 
-    public function __construct()
-    {
-        $this->userAddresses = new ArrayCollection();
-    }
+    #[ORM\OneToOne(targetEntity: UserAddress::class, mappedBy: 'user', orphanRemoval: true)]
+    private ?UserAddress $user_address = null;
+
 
     public function getDefaultPaymentMethod(): int
     {
@@ -164,33 +158,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    /**
-     * @return Collection<int, UserAddress>
-     */
-    public function getUserAddresses(): Collection
+    public function getDefaultAddress(): ?UserAddress
     {
-        return $this->userAddresses;
+        return $this->user_address;
     }
 
-    public function addUserAddress(UserAddress $userAddress): static
-    {
-        if (!$this->userAddresses->contains($userAddress)) {
-            $this->userAddresses->add($userAddress);
-            $userAddress->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeUserAddress(UserAddress $userAddress): static
-    {
-        if ($this->userAddresses->removeElement($userAddress)) {
-            // set the owning side to null (unless already changed)
-            if ($userAddress->getUser() === $this) {
-                $userAddress->setUser(null);
-            }
-        }
-
-        return $this;
-    }
+    
 }

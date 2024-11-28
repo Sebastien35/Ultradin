@@ -23,7 +23,7 @@ class UserAddress
     #[ORM\JoinColumn(name: "id_countryiso3", referencedColumnName: "id_countryiso3", nullable: false)]
     private ?CountryIso3 $country = null;
 
-    #[ORM\ManyToOne(inversedBy: 'userAddresses')]
+    #[ORM\OneToOne(inversedBy: 'userAddresses')]
     #[ORM\JoinColumn(name: "id_user", referencedColumnName: "id_user", nullable: false)]
     private ?User $user = null;
 
