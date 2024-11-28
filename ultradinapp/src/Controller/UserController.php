@@ -35,14 +35,19 @@ class UserController extends AbstractController
 
         $method = $request->getMethod();
         $isAdmin = $authorizationChecker->isGranted('ROLE_ADMIN');
-        $isOwner = $user->getId() === $loggedInUser['id'];
+        $isOwner = $user->getId() === $loggedInUser->getId();
 
         if (!$isAdmin && !$isOwner) {
             return $this->json(['error' => 'Access denied'], Response::HTTP_FORBIDDEN);
         }
         switch($method){
             case 'GET':
-                return $this->json($user);
+                try{
+                    $data = $userRepo->getUserById($id);
+                    return $this->json($data);
+                } catch (\Exception $e) {
+                    return $this->json(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
             case 'PUT':
                 $data = json_decode($request->getContent(), true);
                 if (!$data) {

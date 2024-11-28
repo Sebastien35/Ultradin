@@ -9,6 +9,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use App\Entity\UserAddress;
+use App\Entity\CountryIso3;
 
 /**
  * @extends ServiceEntityRepository<User>
@@ -37,10 +38,37 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function updateUser(User $user, $data){
         $user->setEmail($data['email'] ?? $user->getEmail());
         $user->setPhone($data['phone'] ?? $user->getPhone());
-        $user->setRoles($data['roles'] ?? $user->getRoles());
         if(isset($data['address'])){
-            
-
+            $address = $user->getAddress();
+            if(!$address){
+                $address = new UserAddress();
+                $address->setUser($user);
+            }
+            $address->setCity($data['address']['city'] ?? $address->getCity());
+            $address->setZip($data['address']['zip'] ?? $address->getZip());
+            if (isset($data['address']['country'])) {
+                $countryIso3Repository = $this->getEntityManager()->getRepository(CountryIso3::class);
+                $country = $countryIso3Repository->findOneBy(['iso3' => $data['address']['country']]);
+    
+                if (!$country) {
+                    throw new \InvalidArgumentException("Country with ISO3 '{$data['address']['country']}' not found.");
+                }
+    
+                $address->setCountry($country);
+            }
         }
+    }
+
+    public function getUserById(int $id): array
+    {
+        $user = $this->find($id);
+        $user_f = [
+            "id" => $user->getId(),
+            "address" => $user->getAddress(),
+            "email" => $user->getEmail(),
+            "phone" => $user->getPhone(),
+            "roles" => $user->getRoles(),
+        ];
+        return $user_f;
     }
 }
