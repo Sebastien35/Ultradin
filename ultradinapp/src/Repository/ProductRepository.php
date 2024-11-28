@@ -71,7 +71,7 @@ class ProductRepository extends ServiceEntityRepository
     {
         $entityManager = $this->getEntityManager();
         $query = $entityManager->createQuery(
-        'SELECT p
+            'SELECT p
             FROM App\Entity\Product p
             JOIN p.category c
             WHERE c.name IN (:categories)
@@ -80,7 +80,9 @@ class ProductRepository extends ServiceEntityRepository
         )
         ->setParameter('categories', $categories)
         ->setParameter('categoryCount', count($categories));
+
         $products = $query->getResult();
+
         return array_map(function ($product) {
             return [
                 'id' => $product->getIdProduct(),
