@@ -96,4 +96,4 @@ class ProductRepository extends ServiceEntityRepository
             ];
         }, $products);
     }
-    }
+}
