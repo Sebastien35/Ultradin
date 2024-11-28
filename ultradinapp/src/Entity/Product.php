@@ -47,8 +47,8 @@ class Product
     
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinTable(name: 'product_category')]
-    #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id_product')]
-    #[ORM\InverseJoinColumn(name: 'category_id', referencedColumnName: 'id_category')]
+    #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id_product')]
+    #[ORM\InverseJoinColumn(name: 'id_category', referencedColumnName: 'id_category')]
     #[MaxDepth(1)]
     private Collection $category;
 
