@@ -36,9 +36,7 @@ class Order
     #[ORM\JoinColumn(nullable: false, referencedColumnName:'id_user')]
     private ?user $user = null;
 
-    /**
-     * @var Collection<int, product>
-     */
+
     #[ORM\ManyToMany(targetEntity: Product::class)]
     #[ORM\JoinTable(
         name: "order_product", // Name of the join table

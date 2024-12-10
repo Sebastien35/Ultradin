@@ -85,7 +85,6 @@ class SecurityController extends AbstractController
         $user->setPassword($hashedPassword);
         $user->setDefaultPaymentMethod($data['default_payment_method']);
 
-        // Save user to the database
         $entityManager->persist($user);
         $entityManager->flush();
 
