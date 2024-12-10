@@ -1,3 +1,4 @@
 ./ultradinapp/node_modules/
 ./ultradinReact/node_modules/
 /node_modules
+./ultradinapp/public/invoices/
