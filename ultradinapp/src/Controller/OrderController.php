@@ -18,9 +18,6 @@ use Doctrine\ORM\EntityManager;
 class OrderController extends AbstractController
 {
     
-
-    
-
     public function createOrder(Cart $cart, EntityManagerInterface  $em){
         try{
         $newOrder = new Order();
