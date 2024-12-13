@@ -1,8 +1,13 @@
 import NavBar from "@/components/ui/navbar"
 import { TextInput, Button } from "react-native"
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
-import React, { useState } from "react"
+import React, { useState, useContext } from 'react';
 import { API_URL } from "@/constants/Config"
+import { AuthContext } from '../Contexts/AuthContext'; 
+import { getValueFor, save } from '../../security/secureStorage.jsx'
+
+
+
 
 export default function App() {
     const [email, setEmail] = useState("")
@@ -18,10 +23,27 @@ export default function App() {
                 body:JSON.stringify({email, password})
             })
             const data = await response.json()
-            console.log(data)
+            const token = data.token
+            if (token) {
+                save('jwt', token)
+            } else {
+                console.error('Token not found in response');
+            }
         } catch (error) {
             console.error(error)
         }
+    }
+
+    const  getToken = async() => {
+        try{
+            getValueFor('jwt').then((token) => {
+                console.log(token)
+            })
+        } catch (error) {
+            console.error(error)
+
+        }
+
     }
 
     return(
@@ -40,6 +62,7 @@ export default function App() {
                     onChangeText={setPassword}
                 />
                 <Button title="Envoyer" onPress={handleSubmit}/>
+                <Button title="Get Token" onPress={getToken}/>
             </SafeAreaView>
         </SafeAreaProvider>
     )

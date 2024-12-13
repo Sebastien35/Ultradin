@@ -1,7 +1,10 @@
 import NavBar from "@/components/ui/navbar";
+import { AuthProvider } from './Contexts/AuthContext'; // Chemin corrigé
 
 export default function App() {
     return(
-        <NavBar/>
+        <AuthProvider>
+            <NavBar/>
+        </AuthProvider>
     )
 }
