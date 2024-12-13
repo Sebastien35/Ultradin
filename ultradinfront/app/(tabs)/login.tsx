@@ -5,7 +5,7 @@ import React, { useState } from "react"
 import { API_URL } from "@/constants/Config"
 
 export default function App() {
-    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
 
     const handleSubmit = async () => {
@@ -15,7 +15,7 @@ export default function App() {
                 headers:{
                     "Content-Type":"application/json"
                 },
-                body:JSON.stringify({username, password})
+                body:JSON.stringify({email, password})
             })
             const data = await response.json()
             console.log(data)
@@ -29,9 +29,9 @@ export default function App() {
             <NavBar/>
             <SafeAreaView>
                 <TextInput 
-                    placeholder="Username" 
-                    value={username}
-                    onChangeText={setUsername}
+                    placeholder="email" 
+                    value={email}
+                    onChangeText={setEmail}
                 />
                 <TextInput 
                     placeholder="Password" 
