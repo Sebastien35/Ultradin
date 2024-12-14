@@ -48,22 +48,32 @@ export default function App() {
 
     return(
         <SafeAreaProvider>
-            <NavBar/>
-            <SafeAreaView>
-                <TextInput 
-                    placeholder="email" 
-                    value={email}
-                    onChangeText={setEmail}
-                />
-                <TextInput 
-                    placeholder="Password" 
-                    secureTextEntry 
-                    value={password}
-                    onChangeText={setPassword}
-                />
-                <Button title="Envoyer" onPress={handleSubmit}/>
-                <Button title="Get Token" onPress={getToken}/>
-            </SafeAreaView>
+            <body style={styles.body}>
+                <NavBar/>
+                <h1>PAGE LOGIN</h1>
+                <SafeAreaView>
+                    <TextInput 
+                        placeholder="email" 
+                        value={email}
+                        onChangeText={setEmail}
+                    />
+                    <TextInput 
+                        placeholder="Password" 
+                        secureTextEntry 
+                        value={password}
+                        onChangeText={setPassword}
+                    />
+                    <Button title="Envoyer" onPress={handleSubmit}/>
+                    <Button title="Get Token" onPress={getToken}/>
+                </SafeAreaView>
+            </body>
         </SafeAreaProvider>
     )
 }
+
+const styles = {
+    body: {
+        fontFamily: "Arial, sans-serif", 
+        backgroundColor: "#F2F2F2",
+    },
+};
