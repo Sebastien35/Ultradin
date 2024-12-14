@@ -16,5 +16,7 @@ const styles = {
     body: {
         fontFamily: "Arial, sans-serif", 
         backgroundColor: "#F2F2F2",
+        padding: "0px",
+        margin: "0px",
     },
 };
