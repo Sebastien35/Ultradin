@@ -25,9 +25,7 @@ const Navbar = () => {
                 <Link href="/products" style={styles.link}>
                     Products
                 </Link>
-                <Link href="/contact" style={styles.link}>
-                    Contact
-                </Link>
+                
                 <Link href="/login" style={styles.link}>
                     Account
                 </Link>

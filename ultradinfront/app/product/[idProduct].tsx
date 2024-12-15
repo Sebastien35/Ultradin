@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Image, ScrollView, Button } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { GetProducts } from "@/scripts/GetProducts";
+import Navbar from "@/components/ui/navbar";
 
 export default function Product() {
     const { idProduct } = useLocalSearchParams(); // Extract 'idProduct' from route parameters
-    console.log(idProduct);
-    const [product, setProduct] = useState<{ idProduct: number; name: string; description?: string } | null>(null);
+    const [product, setProduct] = useState<{ 
+        idProduct: number; 
+        name: string; 
+        description?: string; 
+        price?: number; 
+        imageUrl?: string; 
+    } | null>(null);
     const [error, setError] = useState("");
 
     const fetchProduct = async (idProduct: number) => {
@@ -20,7 +26,12 @@ export default function Product() {
     };
 
     useEffect(() => {
-        fetchProduct(parseInt(idProduct));
+        const productId = parseInt(idProduct as string);
+        if (!isNaN(productId)) {
+            fetchProduct(productId);
+        } else {
+            setError("Invalid product ID");
+        }
     }, []);
 
     if (error) {
@@ -40,13 +51,37 @@ export default function Product() {
     }
 
     return (
-        <View style={styles.body}>
-            <Text style={styles.title}>Product {product.idProduct}</Text>
-            <Text style={styles.name}>{product.name} </Text>
-            <Text style={styles.description}>
-                {product.description || "No description available."}
-            </Text>
-        </View>
+        
+        <ScrollView style={styles.body}>
+            <Navbar />
+            <View style={styles.productContainer}>
+            
+                {product.imageUrl && (
+                    <Image 
+                        source={{ uri: product.imageUrl }} 
+                        style={styles.productImage} 
+                        resizeMode="contain" 
+                    />
+                )}
+
+                {/* Product Details */}
+                <View style={styles.detailsContainer}>
+                    <Text style={styles.title}>{product.name}</Text>
+                    <Text style={styles.price}>
+                        {product.price ? `$${product.price.toFixed(2)}` : "Price not available"}
+                    </Text>
+                    <Text style={styles.description}>
+                        {product.description || "No description available."}
+                    </Text>
+                </View>
+
+                {/* Action Buttons */}
+                <View style={styles.actionsContainer}>
+                    <Button title="Add to Cart" onPress={() => console.log("Add to Cart")} />
+                    <Button title="Buy Now" color="orange" onPress={() => console.log("Buy Now")} />
+                </View>
+            </View>
+        </ScrollView>
     );
 }
 
@@ -54,25 +89,50 @@ const styles = StyleSheet.create({
     body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
-        paddingHorizontal: 10,
-        paddingTop: 20,
+        padding: 10,
+    },
+    productContainer: {
+        backgroundColor: "#FFF",
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    productImage: {
+        width: "100%",
+        height: 300,
+        marginBottom: 15,
+    },
+    detailsContainer: {
+        marginBottom: 15,
     },
     title: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
-        marginBottom: 20,
+        marginBottom: 10,
         textAlign: "center",
     },
-    name: {
-        fontSize: 18,
+    price: {
+        fontSize: 20,
         fontWeight: "600",
+        color: "green",
         marginBottom: 10,
         textAlign: "center",
     },
     description: {
         fontSize: 16,
         color: "#555",
+        marginBottom: 10,
         textAlign: "center",
+    },
+    actionsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        marginTop: 15,
     },
     error: {
         color: "red",
