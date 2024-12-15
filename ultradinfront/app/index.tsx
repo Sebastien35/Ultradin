@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, ScrollView, Alert } from "react-native";
 import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
+import { Link } from "expo-router";
 
 export default function Home() {
-    const [products, setProducts] = useState<{ id: string; name: string; description?: string }[]>([]);
+    const [products, setProducts] = useState<{ idProduct: number; name: string; description?: string }[]>([]);
     const [error, setError] = useState("");
 
     const fetchProducts = async () => {
@@ -31,12 +32,14 @@ export default function Home() {
             ) : (
                 <ScrollView contentContainerStyle={styles.cardContainer}>
                     {products.map((product, index) => (
-                        <View key={`${product.id || index}`} style={styles.card}>
+                        <Link href={`/product/${product.idProduct}`} key={`${product.idProduct || index}`}>
+                        <View key={`${product.idProduct || index}`} style={styles.card}>
                             <Text style={styles.cardTitle}>{product.name}</Text>
                             <Text style={styles.cardDescription}>
                                 {product.description || "No description available."}
                             </Text>
                         </View>
+                        </Link>
                     ))}
                 </ScrollView>
             )}
