@@ -3,8 +3,8 @@ import { TextInput, Button } from "react-native"
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context"
 import React, { useState, useContext } from 'react';
 import { API_URL } from "@/constants/Config"
-import { AuthContext } from '../Contexts/AuthContext'; 
-import { getValueFor, save } from '../../security/secureStorage.jsx'
+import { AuthContext } from './Contexts/AuthContext'; 
+import { getValueFor, save } from '../security/secureStorage.jsx'
 
 
 
