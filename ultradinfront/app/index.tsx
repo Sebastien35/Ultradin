@@ -5,7 +5,7 @@ import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
 
 export default function Home() {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<{ id: string; name: string; description?: string }[]>([]);
     const [error, setError] = useState("");
 
     const fetchProducts = async () => {
@@ -30,8 +30,8 @@ export default function Home() {
                 <Text style={styles.error}>{error}</Text>
             ) : (
                 <ScrollView contentContainerStyle={styles.cardContainer}>
-                    {products.map((product) => (
-                        <View key={product.id} style={styles.card}>
+                    {products.map((product, index) => (
+                        <View key={`${product.id || index}`} style={styles.card}>
                             <Text style={styles.cardTitle}>{product.name}</Text>
                             <Text style={styles.cardDescription}>
                                 {product.description || "No description available."}
