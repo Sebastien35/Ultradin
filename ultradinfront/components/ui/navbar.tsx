@@ -1,26 +1,9 @@
 import React from "react";
 import { Link, useRouter, usePathname } from "expo-router";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 
 const Navbar = () => {
-    const currentPath = usePathname(); // Get the current path dynamically
-    console.log(currentPath);
-
-    let buttonHref = "";
-    let buttonContent = "";
-    if (currentPath === "/") {
-        buttonHref = "/login";
-        buttonContent = "Login";
-    } else if (currentPath === "/login") {
-        buttonHref = "/register";
-        buttonContent = "Register";
-    } else if (currentPath === "/register") {
-        buttonHref = "/login";
-        buttonContent = "Login";
-    } else {
-        buttonHref = "/login";
-        buttonContent = "Login";
-    }
-
+    const router = useRouter();
     return (
         <nav style={styles.navbar}>
             {/* Logo */}
@@ -50,12 +33,11 @@ const Navbar = () => {
                 </Link>
             </div>
 
-            
         </nav>
     );
 };
 
-const styles = {
+const styles = StyleSheet.create({
     navbar: {
         display: "flex",
         alignItems: "center",
@@ -104,6 +86,6 @@ const styles = {
         alignItems: "center",
         justifyContent: "space-between",
     },
-};
+});
 
 export default Navbar;
