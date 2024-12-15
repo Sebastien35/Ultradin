@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Image, ScrollView, Button } from "react-native";
+import { Text, View, StyleSheet, Image, ScrollView, Button, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { GetProducts } from "@/scripts/GetProducts";
 import Navbar from "@/components/ui/navbar";
@@ -32,7 +32,7 @@ export default function Product() {
         } else {
             setError("Invalid product ID");
         }
-    }, []);
+    }, [idProduct]);
 
     if (error) {
         return (
@@ -51,11 +51,9 @@ export default function Product() {
     }
 
     return (
-        
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
-            
                 {product.imageUrl && (
                     <Image 
                         source={{ uri: product.imageUrl }} 
@@ -77,8 +75,15 @@ export default function Product() {
 
                 {/* Action Buttons */}
                 <View style={styles.actionsContainer}>
-                    <Button title="Add to Cart" onPress={() => console.log("Add to Cart")} />
-                    <Button title="Buy Now" color="orange" onPress={() => console.log("Buy Now")} />
+                    <Button 
+                        title="Add to Cart" 
+                        onPress={() => Alert.alert("Cart", `${product.name} added to cart`)} 
+                    />
+                    <Button 
+                        title="Buy Now" 
+                        color="orange" 
+                        onPress={() => Alert.alert("Buy Now", `Proceeding to buy ${product.name}`)} 
+                    />
                 </View>
             </View>
         </ScrollView>

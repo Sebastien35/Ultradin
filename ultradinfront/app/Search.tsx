@@ -26,25 +26,8 @@ export default function Home() {
     return (
         <View style={styles.body}>
             <NavBar />
-            <Text style={styles.title}>PAGE ACCUEIL</Text>
-            {error ? (
-                <Text style={styles.error}>{error}</Text>
-            ) : (
-                <ScrollView contentContainerStyle={styles.cardContainer}>
-                    {products.map((product) => (
-                        <TouchableOpacity
-                            key={product.idProduct}
-                            style={styles.card}
-                            onPress={() => router.push(`/product/${product.idProduct}`)}
-                        >
-                            <Text style={styles.cardTitle}>{product.name}</Text>
-                            <Text style={styles.cardDescription}>
-                                {product.description || "No description available."}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-            )}
+            <Text style={styles.title}>Rechercher</Text>
+            
         </View>
     );
 }
@@ -65,6 +48,7 @@ const styles = StyleSheet.create({
     error: {
         color: "red",
         textAlign: "center",
+        fontSize: 16,
     },
     cardContainer: {
         paddingBottom: 20,
@@ -78,7 +62,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
-        elevation: 3, // Adds shadow for Android
+        elevation: 3,
     },
     cardTitle: {
         fontSize: 18,
