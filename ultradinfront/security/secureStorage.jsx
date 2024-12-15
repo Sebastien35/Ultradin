@@ -20,16 +20,16 @@ export async function getValueFor(key) {
     if (Platform.OS === 'web') {
       const result = await AsyncStorage.getItem(key);
       if (result) {
-        alert("🔐 Here's your value 🔐 \n" + result);
+        return(result);
       } else {
-        alert('No values stored under that key.');
+        return('');
       }
     } else {
       const result = await SecureStore.getItemAsync(key);
       if (result) {
-        alert("🔐 Here's your value 🔐 \n" + result);
+        return result;
       } else {
-        alert('No values stored under that key.');
+        return('');
       }
     }
   } catch (error) {
