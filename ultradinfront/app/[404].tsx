@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import NavBar from "@/components/ui/navbar";
 import Navbar from "@/components/ui/navbar";
 
 export default function NotFoundPage() {
