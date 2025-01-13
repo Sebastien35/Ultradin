@@ -52,6 +52,9 @@ class Product
     #[MaxDepth(1)]
     private Collection $category;
 
+    #[ORM\Column]
+    private ?float $price_year = null;
+
     public function __construct()
     {
         $this->category = new ArrayCollection();
@@ -190,6 +193,18 @@ class Product
     public function removeCategory(Category $category): static
     {
         $this->category->removeElement($category);
+
+        return $this;
+    }
+
+    public function getPriceYear(): ?float
+    {
+        return $this->price_year;
+    }
+
+    public function setPriceYear(float $price_year): static
+    {
+        $this->price_year = $price_year;
 
         return $this;
     }

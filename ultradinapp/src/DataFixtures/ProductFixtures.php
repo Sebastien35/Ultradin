@@ -23,6 +23,7 @@ class ProductFixtures extends Fixture
             $product->setTechnicalFeatures($faker->paragraph(3));
             $product->setAvailability($faker->boolean());
             $product->setPrice($faker->randomFloat(2, 20, 500));
+            $product->setPriceYear($product->getPrice() * 10);
 
             $manager->persist($product);
         }
