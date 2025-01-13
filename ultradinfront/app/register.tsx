@@ -48,62 +48,60 @@ export default function Register() {
     };
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.safeArea}>
-                <NavBar />
-                <View style={styles.container}>
-                    <Text style={styles.title}>Register</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Email"
-                        value={email}
-                        onChangeText={setEmail}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Confirm Email"
-                        value={confirmEmail}
-                        onChangeText={setConfirmEmail}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Password"
-                        secureTextEntry
-                        value={password}
-                        onChangeText={setPassword}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Confirm Password"
-                        secureTextEntry
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Phone"
-                        value={phone}
-                        onChangeText={setPhone}
-                        keyboardType="phone-pad"
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Default Payment Method"
-                        value={defaultPaymentMethod}
-                        onChangeText={setDefaultPaymentMethod}
-                    />
-                    <Button title="Submit" onPress={handleSubmit} />
-                    <Link href="/login" style={styles.link}>
-                        Already have an account? Login
-                    </Link>
-                </View>
-            </SafeAreaView>
-        </SafeAreaProvider>
+        <View style={styles.body}>
+            <NavBar />
+            <View style={styles.container}>
+                <Text style={styles.title}>Register</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Confirm Email"
+                    value={confirmEmail}
+                    onChangeText={setConfirmEmail}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Password"
+                    secureTextEntry
+                    value={password}
+                    onChangeText={setPassword}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Confirm Password"
+                    secureTextEntry
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Phone"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                />
+                <TextInput
+                    style={styles.input}
+                    placeholder="Default Payment Method"
+                    value={defaultPaymentMethod}
+                    onChangeText={setDefaultPaymentMethod}
+                />
+                <Button title="Submit" onPress={handleSubmit} />
+                <Link href="/login" style={styles.link}>
+                    Already have an account? Login
+                </Link>
+            </View>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+    body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
     },

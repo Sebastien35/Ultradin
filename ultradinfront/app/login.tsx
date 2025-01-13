@@ -42,8 +42,7 @@ export default function Login() {
     };
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView style={styles.safeArea}>
+        <View style={styles.body}>
                 <NavBar />
                 <View style={styles.container}>
                     <Text style={styles.title}>Hello</Text>
@@ -61,19 +60,18 @@ export default function Login() {
                         onChangeText={setPassword}
                     />
                     <Button title="Submit" onPress={handleSubmit} />
-                    <Link href="register" style={styles.link}>
+                    <Link href="register">
                         Register
                     </Link>
                     <View style={styles.spacer} />
                     <Button title="Debug" onPress={getToken} />
                 </View>
-            </SafeAreaView>
-        </SafeAreaProvider>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    safeArea: {
+    body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
     },
