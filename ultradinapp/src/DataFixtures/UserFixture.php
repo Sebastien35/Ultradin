@@ -19,7 +19,17 @@ class UserFixture extends Fixture
     }
 
     public function load(ObjectManager $manager): void
-    {
+    {   
+        $rowCount = (int) $manager->getRepository(User::class)->createQueryBuilder('u')
+            ->select('COUNT(u.id_user)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($rowCount > 0) {
+            $this->logger->info('Users already exist in the database. No need to create new users.');
+            return;
+        }
+
         $userData = [
             ["email" => "admin@email.com", 'password' => 'password', 'phone' => '0123456789', 'roles' => ['ROLE_ADMIN']],
             ['email' => "user@email.com", 'password' => 'password', 'phone' => '9876543210', 'roles' => ['ROLE_USER']]
