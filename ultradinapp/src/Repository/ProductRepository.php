@@ -68,7 +68,7 @@ class ProductRepository extends ServiceEntityRepository
     }
 
     public function findByCategories(array $categories): array
-    {
+    {   
         $entityManager = $this->getEntityManager();
         $query = $entityManager->createQuery(
             'SELECT p
@@ -95,5 +95,56 @@ class ProductRepository extends ServiceEntityRepository
                 ),
             ];
         }, $products);
+    }
+
+    public function findByCategoryId($idsCategory, $minPrice = null, $maxPrice = null)
+    {
+        $entityManager = $this->getEntityManager();
+
+        // Base native SQL
+        $sql = "SELECT *
+                FROM items
+                WHERE category_id IN (:idsCategory)";
+
+        // Parameters array
+        $params = [
+            'idsCategory' => $idsCategory,
+        ];
+
+        // Add price conditions
+        if ($minPrice !== null && $maxPrice !== null) {
+            // Both minPrice and maxPrice
+            $sql .= " AND price BETWEEN :minPrice AND :maxPrice";
+            $params['minPrice'] = $minPrice;
+            $params['maxPrice'] = $maxPrice;
+        } elseif ($minPrice !== null) {
+            // Only minPrice => exact price match
+            $sql .= " AND price = :minPrice";
+            $params['minPrice'] = $minPrice;
+        } elseif ($maxPrice !== null) {
+            // Only maxPrice => price up to maxPrice
+            $sql .= " AND price <= :maxPrice";
+            $params['maxPrice'] = $maxPrice;
+        }
+
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($entityManager);
+        $rsm->addRootEntityFromClassMetadata(\App\Entity\Item::class, 'i');
+
+        // Create the Native Query
+        $query = $entityManager->createNativeQuery($sql, $rsm);
+
+        // Bind parameters
+        $query->setParameter('idsCategory', $idsCategory, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+
+        // Bind min/max only if they exist
+        if ($minPrice !== null) {
+            $query->setParameter('minPrice', $minPrice);
+        }
+        if ($maxPrice !== null) {
+            $query->setParameter('maxPrice', $maxPrice);
+        }
+
+        // Get results
+        return $query->getResult();
     }
 }
