@@ -116,6 +116,30 @@ class ProductController extends AbstractController
     }
 
 
+    #[Route('/search', name: 'search', methods : ['POST'])]
+    public function searchPost(HttpFoundationRequest $request, SerializerInterface $serialzer){
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+            return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
+        }
+        $categories = $data['categories'];
+        $minPrice   = $data['min_price'];
+        $maxPrice   = $data['max_price'];
+        
+        $products = $this->entityManager->getRepository(Product::class)->findByCategoriesAndPrice($categories, $minPrice, $maxPrice);
+        if (!$products) {
+            return new JsonResponse(['error' => 'No products found'], 404);
+        }
+
+        $jsonProducts = $serialzer->serialize($products, 'json');
+        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+        
+
+        
+        
+    }
+
+
     
     #[Route('/categories', name: 'categories', methods: ['GET'])]
     public function getProductsByCategories(
