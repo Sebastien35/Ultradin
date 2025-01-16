@@ -116,27 +116,45 @@ class ProductController extends AbstractController
     }
 
 
+    /**
+     * @Route("/search", name="search", methods={"POST"})
+     * @param HttpFoundationRequest $request
+     * @param SerializerInterface $serialzer
+     * @param ProductRepository $productRepository
+     * @return Response
+     * 
+     * Prend une liste de paramètres dans le corps de la requête POST et les utilise pour récupérer les produits 
+     * correspondants dans la base de données
+     */
     #[Route('/search', name: 'search', methods : ['POST'])]
-    public function searchPost(HttpFoundationRequest $request, SerializerInterface $serialzer){
+    public function searchPost(HttpFoundationRequest $request, SerializerInterface $serialzer, ProductRepository $productRepository): Response{
         $data = json_decode($request->getContent(), true);
         if (!$data) {
             return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
-        $categories = $data['categories'];
-        $minPrice   = $data['min_price'];
-        $maxPrice   = $data['max_price'];
-        
-        $products = $this->entityManager->getRepository(Product::class)->findByCategoriesAndPrice($categories, $minPrice, $maxPrice);
+        $categories = isset($data['categories']) ? $data['categories'] : [];
+        $minPrice   = isset($data['min_price']) ? $data['min_price'] : null;
+        $maxPrice   = isset($data['max_price']) ? $data['max_price'] : null;
+
+
+        $products = $productRepository->findByCategoryId($categories, $minPrice, $maxPrice);
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
+        $returnProducts = [];
+        foreach($products as $product){
+            $productData = array(
+                'id' => $product->getIdProduct(),
+                'name' => $product->getName(),
+                'category' => $product->getCategory(),
+                'description' => $product->getDescription(),
+                'price_month' => $product->getPrice(),
+                'price_year' => $product->getPriceYear(),
+            );
+            $returnProducts[] = $productData;
+        }
+        return new JsonResponse($returnProducts, 200, ['Content-Type' => 'application/json']);
 
-        $jsonProducts = $serialzer->serialize($products, 'json');
-        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
-        
-
-        
-        
     }
 
 
