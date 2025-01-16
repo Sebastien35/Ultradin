@@ -3,6 +3,7 @@ import { Text, View, StyleSheet, Image, ScrollView, Button, Alert } from "react-
 import { useLocalSearchParams } from "expo-router";
 import { GetProducts } from "@/scripts/GetProducts";
 import Navbar from "@/components/ui/navbar";
+import Loader from "@/components/ui/loader";
 
 export default function Product() {
     const { id_product } = useLocalSearchParams(); // Extract 'idProduct' from route parameters
@@ -45,7 +46,7 @@ export default function Product() {
     if (!product) {
         return (
             <View style={styles.body}>
-                <Text style={styles.title}>Loading product...</Text>
+                <Loader />
             </View>
         );
     }
