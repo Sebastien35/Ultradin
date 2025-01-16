@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-nati
 import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
 import { useRouter } from "expo-router";
+import Footer from "@/components/ui/footer";
 
 export default function Home() {
     const [products, setProducts] = useState<{ idProduct: number; name: string; description?: string }[]>([]);
@@ -45,6 +46,7 @@ export default function Home() {
                     ))}
                 </ScrollView>
             )}
+            <Footer />
         </View>
     );
 }
