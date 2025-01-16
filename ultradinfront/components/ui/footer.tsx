@@ -1,57 +1,64 @@
 import React from 'react';
+import { StyleSheet, Text, View, Linking, TouchableOpacity } from 'react-native';
 
 const Footer: React.FC = () => {
   return (
-    <footer style={styles.footer}>
-      <div style={styles.linksContainer}>
-        <a href="#" style={styles.link}>
-          Conditions générales d’utilisation
-        </a>
-        <a href="#" style={styles.link}>
-          Mentions légales
-        </a>
-        <a href="#" style={styles.link}>
-          Contact
-        </a>
-      </div>
-      <div style={styles.socialContainer}>
-        <span>Réseaux Sociaux</span>
-        <div style={styles.iconBox}>Icons</div>
-      </div>
-    </footer>
+    <View style={styles.footer}>
+      <View style={styles.linksContainer}>
+        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+          <Text style={styles.link}>Conditions générales d’utilisation</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+          <Text style={styles.link}>Mentions légales</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+          <Text style={styles.link}>Contact</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.socialContainer}>
+        <Text>Réseaux Sociaux</Text>
+        <View style={styles.iconBox}>
+          <Text>Icons</Text>
+        </View>
+      </View>
+    </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   footer: {
-    display: 'flex',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '1rem 2rem',
-    borderTop: '1px solid #ccc',
-    fontSize: '14px',
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderTopWidth: 1,
+    borderTopColor: '#ccc',
   },
   linksContainer: {
-    display: 'flex',
-    gap: '2rem',
+    flexDirection: 'row',
+    gap: 20,
   },
   link: {
-    textDecoration: 'none',
-    color: 'black',
+    fontSize: 14,
   },
   socialContainer: {
-    display: 'flex',
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: '1rem',
+    gap: 10,
   },
   iconBox: {
-    display: 'flex',
-    alignItems: 'center',
     justifyContent: 'center',
-    width: '50px',
-    height: '25px',
-    border: '1px solid black',
+    alignItems: 'center',
+    width: 50,
+    height: 25,
+    borderWidth: 1,
+    borderColor: 'black',
   },
-};
+});
 
 export default Footer;
