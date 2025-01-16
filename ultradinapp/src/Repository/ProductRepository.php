@@ -103,8 +103,9 @@ class ProductRepository extends ServiceEntityRepository
 
         // Base native SQL
         $sql = "SELECT *
-                FROM items
-                WHERE category_id IN (:idsCategory)";
+                FROM product
+                LEFT JOIN product_category ON product.id_product = product_category.product_id
+                WHERE product_category.category_id IN (:idsCategory)";
 
         // Parameters array
         $params = [
@@ -114,7 +115,7 @@ class ProductRepository extends ServiceEntityRepository
         // Add price conditions
         if ($minPrice !== null && $maxPrice !== null) {
             // Both minPrice and maxPrice
-            $sql .= " AND price BETWEEN :minPrice AND :maxPrice";
+            $sql .= " AND price_month BETWEEN :minPrice AND :maxPrice";
             $params['minPrice'] = $minPrice;
             $params['maxPrice'] = $maxPrice;
         } elseif ($minPrice !== null) {
@@ -128,7 +129,7 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($entityManager);
-        $rsm->addRootEntityFromClassMetadata(\App\Entity\Item::class, 'i');
+        $rsm->addRootEntityFromClassMetadata(\App\Entity\Product::class, 'i');
 
         // Create the Native Query
         $query = $entityManager->createNativeQuery($sql, $rsm);
