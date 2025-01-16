@@ -5,18 +5,18 @@ import { GetProducts } from "@/scripts/GetProducts";
 import Navbar from "@/components/ui/navbar";
 
 export default function Product() {
-    const { idProduct } = useLocalSearchParams(); // Extract 'idProduct' from route parameters
+    const { id_product } = useLocalSearchParams(); // Extract 'idProduct' from route parameters
     const [product, setProduct] = useState<{ 
-        idProduct: number; 
+        id_product: number; 
         name: string; 
         description?: string; 
         price?: number; 
-        imageUrl?: string; 
+        image_url?: string; 
     } | null>(null);
     const [error, setError] = useState("");
 
-    const fetchProduct = async (idProduct: number) => {
-        const FetchProduct = await GetProducts(idProduct);
+    const fetchProduct = async (id_product: number) => {
+        const FetchProduct = await GetProducts(id_product);
         if (FetchProduct.status === "OK") {
             setProduct(FetchProduct.data);
         } else {
@@ -26,13 +26,13 @@ export default function Product() {
     };
 
     useEffect(() => {
-        const productId = parseInt(idProduct as string);
+        const productId = parseInt(id_product as string);
         if (!isNaN(productId)) {
             fetchProduct(productId);
         } else {
             setError("Invalid product ID");
         }
-    }, [idProduct]);
+    }, [id_product]);
 
     if (error) {
         return (
@@ -54,9 +54,9 @@ export default function Product() {
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
-                {product.imageUrl && (
+                {product.image_url && (
                     <Image 
-                        source={{ uri: product.imageUrl }} 
+                        source={{ uri: product.image_url }} 
                         style={styles.productImage} 
                         resizeMode="contain" 
                     />

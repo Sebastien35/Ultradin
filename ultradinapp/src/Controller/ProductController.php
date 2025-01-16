@@ -86,7 +86,7 @@ class ProductController extends AbstractController
         }
         switch ($method) {
             case 'GET':
-                $jsonProduct = $serializer->serialize($product, 'json');
+                $jsonProduct = $serializer->serialize($product, 'json', ['groups' => 'product:read']);
                 return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
             case 'DELETE':
                 return $productRepository->deleteProduct($product);

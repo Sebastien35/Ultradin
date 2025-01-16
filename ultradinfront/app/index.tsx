@@ -35,7 +35,7 @@ export default function Home() {
                         <TouchableOpacity
                             key={product.id_product}
                             style={styles.card}
-                            onPress={() => router.push(`/product/${product.idProduct}`)}
+                            onPress={() => router.push(`/product/${product.id_product}`)}
                         >
                             <Text style={styles.cardTitle}>{product.name}</Text>
                             <Text style={styles.cardDescription}>
