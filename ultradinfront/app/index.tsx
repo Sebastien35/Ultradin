@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import Footer from "@/components/ui/footer";
 
 export default function Home() {
-    const [products, setProducts] = useState<{ idProduct: number; name: string; description?: string }[]>([]);
+    const [products, setProducts] = useState<{ id_product: number; name: string; description?: string }[]>([]);
     const [error, setError] = useState("");
     const router = useRouter();
 
@@ -34,9 +34,9 @@ export default function Home() {
                 <ScrollView contentContainerStyle={styles.cardContainer}>
                     {products.map((product) => (
                         <TouchableOpacity
-                            key={product.idProduct}
+                            key={product.id_product}
                             style={styles.card}
-                            onPress={() => router.push(`/product/${product.idProduct}`)}
+                            onPress={() => router.push(`/product/${product.id_product}`)}
                         >
                             <Text style={styles.cardTitle}>{product.name}</Text>
                             <Text style={styles.cardDescription}>

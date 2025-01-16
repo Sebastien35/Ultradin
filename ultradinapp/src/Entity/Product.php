@@ -15,43 +15,55 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: "id_product", type: "integer")]
+    #[Groups(['product:read'])]
     private ?int $id_product = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(length: 320)]
     private ?string $image_url = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?int $stock = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_created = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $technical_features = null;
 
+
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?bool $availability = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?float $price = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_updated = null;
 
-    
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinTable(name: 'product_category')]
     #[ORM\JoinColumn(name: 'product_id', referencedColumnName: 'id_product')]
     #[ORM\InverseJoinColumn(name: 'category_id', referencedColumnName: 'id_category')]
     #[MaxDepth(1)]
+    #[Groups(['product:read'])]
     private Collection $category;
 
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?float $price_year = null;
 
@@ -208,4 +220,6 @@ class Product
 
         return $this;
     }
+
+    
 }
