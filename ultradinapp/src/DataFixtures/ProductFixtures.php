@@ -8,18 +8,31 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ManagerRegistry;
 use Faker\Factory;
 use App\Entity\Category;
+use Psr\Log\LoggerInterface;
 
 class ProductFixtures extends Fixture
 {
     private $managerRegistry;
+    private LoggerInterface $logger;
 
-    public function __construct(ManagerRegistry $managerRegistry)
+    public function __construct(ManagerRegistry $managerRegistry, LoggerInterface $logger)
     {
         $this->managerRegistry = $managerRegistry;
+        $this->logger = $logger;
     }
     public function load(ObjectManager $manager): void
     {
         $faker = Factory::create();
+
+        $rowCount = (int) $manager->getRepository(Product::class)->createQueryBuilder('u')
+            ->select('COUNT(u.id_product)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($rowCount > 0) {
+            $this->logger->info('Users already exist in the database. No need to create new users.');
+            return;
+        }
 
         // Création des produits
         for ($i = 1; $i <= 50; $i++) {
