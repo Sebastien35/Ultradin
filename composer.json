@@ -1,0 +1,6 @@
+{
+    "require": {
+        "symfony/serializer": "^7.2",
+        "doctrine/annotations": "^2.0"
+    }
+}

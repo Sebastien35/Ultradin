@@ -1,4 +1,6 @@
 ./ultradinapp/node_modules/
+./ultradinapp/vendor/
 ./ultradinReact/node_modules/
 /node_modules
 ./ultradinapp/public/invoices/
+./utradinfront/.expo

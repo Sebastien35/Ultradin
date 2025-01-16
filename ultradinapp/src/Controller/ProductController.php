@@ -63,7 +63,7 @@ class ProductController extends AbstractController
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
-        $jsonProducts = $serializer->serialize($products, 'json');
+        $jsonProducts = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }
 
