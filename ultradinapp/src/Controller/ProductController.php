@@ -86,10 +86,9 @@ class ProductController extends AbstractController
         }
         switch ($method) {
             case 'GET':
-                $suggestions = $productRepository->findSuggestions($product);
-                $product['suggestions'] = $suggestions;
-                $jsonProduct = $serializer->serialize($product, 'json', ['groups' => 'product:read']);
-                return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
+                $product = $productRepository->findOneByIdAndReturnSuggestions($product->getIdProduct(), 5);
+                
+                return new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
             case 'DELETE':
                 return $productRepository->deleteProduct($product);
             case 'PUT':
