@@ -174,6 +174,6 @@ function startExpoServer(cb) {
 
 
 // Define the `migrate-fixtures` task
-task('up', series(dockerComposeUp,  composerInstall, runMigrations, loadFixtures, startSymfony, startExpoServer));
+task('up', series(dockerComposeUp,  runMigrations, loadFixtures, startSymfony, startExpoServer));
 
 exports.default = series(createJwtDir, generatePrivateKey, generatePublicKey, setPermissions);
