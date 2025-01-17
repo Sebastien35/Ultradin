@@ -46,6 +46,7 @@ class ProductFixtures extends Fixture
             $product->setAvailability($faker->boolean());
             $product->setPrice($faker->randomFloat(2, 20, 500));
             $product->setPriceYear($product->getPrice() * 10);
+            $product->setWeeklySales($faker->numberBetween(0, 100));
 
             $manager->persist($product);
         }

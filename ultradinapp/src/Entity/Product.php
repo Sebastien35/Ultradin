@@ -67,6 +67,9 @@ class Product
     #[ORM\Column]
     private ?float $price_year = null;
 
+    #[ORM\Column]
+    private ?int $weekly_sales = null;
+
     public function __construct()
     {
         $this->category = new ArrayCollection();
@@ -217,6 +220,18 @@ class Product
     public function setPriceYear(float $price_year): static
     {
         $this->price_year = $price_year;
+
+        return $this;
+    }
+
+    public function getWeeklySales(): ?int
+    {
+        return $this->weekly_sales;
+    }
+
+    public function setWeeklySales(int $weekly_sales): static
+    {
+        $this->weekly_sales = $weekly_sales;
 
         return $this;
     }
