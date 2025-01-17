@@ -11,10 +11,10 @@ const Footer: React.FC = () => {
         <TouchableOpacity onPress={() => router.push('/cgu')}>
           <Text style={styles.link}>Conditions générales d’utilisation</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/')}>
+        <TouchableOpacity onPress={() => router.push('/legals')}>
           <Text style={styles.link}>Mentions légales</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push('/')}>
+        <TouchableOpacity onPress={() => router.push('/contact')}>
           <Text style={styles.link}>Contact</Text>
         </TouchableOpacity>
       </View>
