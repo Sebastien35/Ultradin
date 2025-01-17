@@ -1,17 +1,20 @@
 import React from 'react';
+import { Link, useRouter } from "expo-router";
 import { StyleSheet, Text, View, Linking, TouchableOpacity } from 'react-native';
 
 const Footer: React.FC = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.footer}>
       <View style={styles.linksContainer}>
-        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+        <TouchableOpacity onPress={() => router.push('/cgu')}>
           <Text style={styles.link}>Conditions générales d’utilisation</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+        <TouchableOpacity onPress={() => router.push('/')}>
           <Text style={styles.link}>Mentions légales</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => Linking.openURL('#')}>
+        <TouchableOpacity onPress={() => router.push('/')}>
           <Text style={styles.link}>Contact</Text>
         </TouchableOpacity>
       </View>
