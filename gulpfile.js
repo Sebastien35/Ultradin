@@ -2,6 +2,7 @@ const { series, task } = require('gulp');
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process').exec;
+const { spawn } = require('child_process');
 
 // Path to the JWT directory and files
 const jwtDir = path.join(__dirname, 'ultradinapp', 'config', 'jwt');
@@ -66,6 +67,36 @@ task('keygen', series(createJwtDir, generatePrivateKey, generatePublicKey, setPe
 
 
 const ultradinAppDir = path.join(__dirname, 'ultradinapp');
+const ultradinFrontDir = path.join(__dirname, 'ultradinfront')
+
+//Task to install composer dependencies
+
+function composerInstall(cb) {
+  exec(`cd ${ultradinAppDir}  && composer install`, (err, stdout, stderr) => {
+    if (stdout) console.log(stdout);
+    if (stderr) console.error(stderr);
+    cb(err);
+  });
+}
+
+//Task to start docker server
+function dockerComposeUp(cb) {
+  console.log('Starting docker database container');
+
+  exec('docker compose up -d', (err, stdout, stderr) => {
+      if (err) {
+          console.error('Error starting container:', err);
+      }
+      if (stdout) {
+          console.log(stdout);
+      }
+      if (stderr) {
+          console.error(stderr);
+      }
+      // Signal task completion
+      cb();
+  });
+}
 
 // Task to navigate to the Ultradin app directory and run migrations
 function runMigrations(cb) {
@@ -94,7 +125,55 @@ function loadFixtures(cb) {
   });
 }
 
+
+// Task to start symfony server 
+function startSymfony(cb) {
+  // Utilise 'cmd.exe' pour ouvrir un nouveau terminal et exécuter la commande
+  const child = spawn('cmd.exe', [
+    '/c', 
+    'start',         // Ouvre une nouvelle fenêtre
+    'cmd.exe', 
+    '/k', 
+    'symfony server:start'  // Commande à exécuter dans le nouveau terminal
+  ], {
+    cwd: ultradinAppDir, // Répertoire de travail
+    detached: true       // Détache le processus pour qu'il ne dépende pas du processus parent
+  });
+
+  child.on('error', error => {
+    console.error(`Erreur lors de l'ouverture du terminal : ${error}`);
+    cb(error);
+  });
+
+  // Signale la fin de la tâche immédiatement après le lancement du terminal
+  cb();
+}
+
+// Task to start symfony server 
+function startExpoServer(cb) {
+  const child = spawn('cmd.exe', [
+    '/c',
+    'start',               // Ouvre une nouvelle fenêtre
+    'cmd.exe', 
+    '/k', 
+    'npx expo start'       // Commande à exécuter dans le nouveau terminal
+  ], {
+    cwd: ultradinFrontDir, // Répertoire de travail
+    detached: true         // Détache le processus pour l'exécution indépendante
+  });
+
+  child.on('error', error => {
+    console.error(`Erreur lors du lancement du serveur Expo: ${error}`);
+    cb(error);
+  });
+
+  // Signale la fin de la tâche immédiatement après le lancement du terminal
+  cb();
+}
+
+
+
 // Define the `migrate-fixtures` task
-task('mif', series(runMigrations, loadFixtures));
+task('up', series(dockerComposeUp,  composerInstall, runMigrations, loadFixtures, startSymfony, startExpoServer));
 
 exports.default = series(createJwtDir, generatePrivateKey, generatePublicKey, setPermissions);

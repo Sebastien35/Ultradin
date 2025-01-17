@@ -149,5 +149,36 @@ class ProductRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
+    public function findSuggestions(Product $product): array{
+        $entityManager = $this->getEntityManager();
+        $five_products = $entityManager->createQuery(
+            'SELECT p
+            FROM App\Entity\Product p
+            WHERE p.category = :category
+            AND p.id_product != :productId
+            ORDER BY p.date_created DESC'
+        )
+        ->setParameter('category', $product->getCategory())
+        ->setParameter('productId', $product->getIdProduct())
+        ->setMaxResults(5)
+        ->getResult();
+
+        return array_map(function ($product) {
+            return [
+                'id' => $product->getIdProduct(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+                'price' => $product->getPrice(),
+                'categories' => array_map(
+                    fn($category) => $category->getName(),
+                    $product->getCategory()->toArray()
+                ),
+            ];
+        }, $five_products);
+
+        
+        
+    }
+
 
 }
