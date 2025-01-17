@@ -149,18 +149,24 @@ class ProductRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    public function findSuggestions(Product $product): array{
+    public function findSuggestions(Product $product, $limit = null): array
+    {
+        $limit = $limit + 1 ?? 3; 
         $entityManager = $this->getEntityManager();
-        $five_products = $entityManager->createQuery(
+        $categories = $product->getCategory()->toArray();
+        $categoriesIds = array_map(fn($category) => $category->getIdCategory(), $categories);
+
+        $fiveProducts = $entityManager->createQuery(
             'SELECT p
             FROM App\Entity\Product p
-            WHERE p.category = :category
+            JOIN p.category c
+            WHERE c.id_category IN (:categoriesIds)
             AND p.id_product != :productId
             ORDER BY p.date_created DESC'
         )
-        ->setParameter('category', $product->getCategory())
+        ->setParameter('categoriesIds', $categoriesIds)
         ->setParameter('productId', $product->getIdProduct())
-        ->setMaxResults(5)
+        ->setMaxResults($limit)
         ->getResult();
 
         return array_map(function ($product) {
@@ -169,14 +175,43 @@ class ProductRepository extends ServiceEntityRepository
                 'name' => $product->getName(),
                 'description' => $product->getDescription(),
                 'price' => $product->getPrice(),
-                'categories' => array_map(
-                    fn($category) => $category->getName(),
-                    $product->getCategory()->toArray()
-                ),
+                'categories' => $product->getCategory()->toArray(),
+                'image_url' => $product->getImageUrl(),
             ];
-        }, $five_products);
+        }, $fiveProducts);
+    }
 
+    public function findOneByIdAndReturnSuggestions($id, $limit = 3)
+    {
+        $entityManager = $this->getEntityManager();
+        $product = $entityManager->find(Product::class, $id);
+
+        if (!$product) {
+            return null;
+        }
+
+        $suggestions = $this->findSuggestions($product, $limit);
+        $arraySuggestions = [];
+        foreach ($suggestions as $suggestion) {
+            $suggestionObject = [];
+            $suggestionObject['id'] = $suggestion['id'];
+            $suggestionObject['name'] = $suggestion['name'];
+            $suggestionObject['price'] = $suggestion['price'];
+            $suggestionObject['image_url'] = $suggestion['image_url'];
         
+            $arraySuggestions[] = $suggestionObject;
+        }
+        
+        $data = [
+            'id' => $product->getIdProduct(),
+            'name' => $product->getName(),
+            'description' => $product->getDescription(),
+            'price' => $product->getPrice(),
+            'categories' => array_map(fn($category) => $category->getName(), $product->getCategory()->toArray()),
+            'suggestions' => $arraySuggestions
+        ];
+
+        return $data;
         
     }
 

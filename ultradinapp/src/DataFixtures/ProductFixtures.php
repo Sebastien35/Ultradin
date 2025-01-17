@@ -64,11 +64,14 @@ class ProductFixtures extends Fixture
         $products = $manager->getRepository(Product::class)->findAll();
         $categories = $manager->getRepository(Category::class)->findAll();
 
-        // Associer chaque produit à toutes les catégories
+
         foreach ($products as $product) {
-            foreach ($categories as $category) {
-                $product->addCategory($category);
-            }
+            // Shuffle the categories array
+            shuffle($categories);
+
+            // Add the first two categories from the shuffled list
+            $product->addCategory($categories[0]);
+            $product->addCategory($categories[1]);
         }
         $manager->flush();
     }
