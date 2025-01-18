@@ -18,6 +18,11 @@ class CartFixtures extends Fixture implements DependentFixtureInterface
         $faker = Factory::create();
         $products = $manager->getRepository(Product::class)->findAll();
         $users = $manager->getRepository(User::class)->findAll();
+
+        $carts = $manager->getRepository(Cart::class)->findAll();
+        if (count($carts) > 0) {
+            return;
+        }
         
 
         $now = new \DateTime();

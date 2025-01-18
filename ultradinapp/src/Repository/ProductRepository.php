@@ -216,5 +216,36 @@ class ProductRepository extends ServiceEntityRepository
         
     }
 
+    public function getSuggestionsV2(Product $product): array
+    {
+        $em = $this->getEntityManager();
+
+        // Définir le mapping des résultats
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($em);
+        $rsm->addRootEntityFromClassMetadata(Product::class, 'p');
+
+        // Requête SQL native pour trouver les produits fréquemment achetés ensemble
+        $sql = '
+            SELECT p.*
+            FROM cart_product cp1
+            JOIN cart_product cp2 ON cp1.cart_id = cp2.cart_id
+            JOIN product p ON p.id_product = cp2.product_id
+            WHERE cp1.product_id = :productId
+            AND cp2.product_id != :productId
+            GROUP BY p.id_product
+            ORDER BY COUNT(*) DESC
+            LIMIT 5
+        ';
+
+        // Créer la requête native
+        $query = $em->createNativeQuery($sql, $rsm);
+        $query->setParameter('productId', $product->getIdProduct());
+
+        // Exécuter la requête et obtenir les résultats
+        $suggestedProducts = $query->getResult();
+
+        return $suggestedProducts;
+    }
+
 
 }

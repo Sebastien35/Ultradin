@@ -19,9 +19,9 @@ class DebugController extends AbstractController
     public function index(ProductRepository $pr, EntityManagerInterface $em, SerializerInterface $s): Response
     {   
         $product = $pr->findAll()[0];
-        $product = $pr->findOneByIdAndReturnSuggestions($product->getIdProduct(), 5);
-        $jsonProduct = $s->serialize($product, 'json');
-        return new JsonResponse($jsonProduct, 200, [], true);
+        $suggestions = $pr->getSuggestionsV2($product);
+
+        dd($suggestions);
 
         
 
