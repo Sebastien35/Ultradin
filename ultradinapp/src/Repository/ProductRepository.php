@@ -181,8 +181,13 @@ class ProductRepository extends ServiceEntityRepository
         }, $fiveProducts);
     }
 
-    public function findOneByIdAndReturnSuggestions($id, $limit = 3)
-    {
+    public function findOneByIdAndReturnSuggestions($id, $limit = null )
+    {   
+
+        if($limit == null){
+            $limit = 3;
+        }
+
         $entityManager = $this->getEntityManager();
         $product = $entityManager->find(Product::class, $id);
 
@@ -190,15 +195,15 @@ class ProductRepository extends ServiceEntityRepository
             return null;
         }
 
-        $suggestions = $this->findSuggestions($product, $limit);
+        $suggestions = $this->getSuggestionsV2($product, $limit);
         $arraySuggestions = [];
         foreach ($suggestions as $suggestion) {
             $suggestionObject = [];
-            $suggestionObject['id'] = $suggestion['id'];
-            $suggestionObject['name'] = $suggestion['name'];
-            $suggestionObject['price'] = $suggestion['price'];
-            $suggestionObject['image_url'] = $suggestion['image_url'];
-        
+            $suggestionObject['id'] = $suggestion->getIdProduct(); // Utilisation de l'opérateur '->' et de la méthode getter appropriée
+            $suggestionObject['name'] = $suggestion->getName(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['price'] = $suggestion->getPrice(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['image_url'] = $suggestion->getImageUrl(); // Utilisation de la méthode getter appropriée
+
             $arraySuggestions[] = $suggestionObject;
         }
         
@@ -216,9 +221,12 @@ class ProductRepository extends ServiceEntityRepository
         
     }
 
-    public function getSuggestionsV2(Product $product): array
+    public function getSuggestionsV2(Product $product, int $limit = null): array
     {
         $em = $this->getEntityManager();
+        if ($limit === null) {
+            $limit = 3;
+        }
 
         // Définir le mapping des résultats
         $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($em);
@@ -234,12 +242,12 @@ class ProductRepository extends ServiceEntityRepository
             AND cp2.product_id != :productId
             GROUP BY p.id_product
             ORDER BY COUNT(*) DESC
-            LIMIT 5
         ';
 
         // Créer la requête native
         $query = $em->createNativeQuery($sql, $rsm);
         $query->setParameter('productId', $product->getIdProduct());
+        $query->setParameter('limit', $limit, \PDO::PARAM_INT);
 
         // Exécuter la requête et obtenir les résultats
         $suggestedProducts = $query->getResult();
