@@ -18,8 +18,8 @@ class DebugController extends AbstractController
     #[Route('/', name: 'index', methods: ['GET'])]
     public function index(ProductRepository $pr, EntityManagerInterface $em, SerializerInterface $s): Response
     {   
-        $product = $pr->findAll()[0];
-        $result = $pr->findOneByIdAndReturnSuggestions($product->getIdProduct());
+        $product = $pr->findAll()[15];
+        $result = $pr->findOneByIdAndReturnSuggestions($product->getIdProduct(), 6);
 
         dd($result);
 

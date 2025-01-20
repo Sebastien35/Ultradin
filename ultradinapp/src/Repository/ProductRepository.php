@@ -149,37 +149,45 @@ class ProductRepository extends ServiceEntityRepository
         return $query->getResult();
     }
 
-    public function findSuggestions(Product $product, $limit = null): array
+    public function findSuggestions(Product $product, int $limit = null): array
     {
-        $limit = $limit + 1 ?? 3; 
-        $entityManager = $this->getEntityManager();
-        $categories = $product->getCategory()->toArray();
-        $categoriesIds = array_map(fn($category) => $category->getIdCategory(), $categories);
+        $em = $this->getEntityManager();
 
-        $fiveProducts = $entityManager->createQuery(
-            'SELECT p
-            FROM App\Entity\Product p
-            JOIN p.category c
-            WHERE c.id_category IN (:categoriesIds)
+        // Default limit if none is provided
+        if ($limit === null) {
+            $limit = 3;
+        }
+
+        // Define the ResultSetMapping for the Product entity
+        $rsm = new \Doctrine\ORM\Query\ResultSetMappingBuilder($em);
+        $rsm->addRootEntityFromClassMetadata(Product::class, 'p');
+
+        // Native SQL query to find products in the same categories as the given product
+        $sql = '
+            SELECT DISTINCT p.*
+            FROM product p
+            JOIN product_category pc ON p.id_product = pc.product_id
+            WHERE pc.category_id IN (
+                SELECT category_id
+                FROM product_category
+                WHERE product_id = :productId
+            )
             AND p.id_product != :productId
-            ORDER BY p.date_created DESC'
-        )
-        ->setParameter('categoriesIds', $categoriesIds)
-        ->setParameter('productId', $product->getIdProduct())
-        ->setMaxResults($limit)
-        ->getResult();
+            ORDER BY p.date_created DESC
+            LIMIT :limit
+        ';
 
-        return array_map(function ($product) {
-            return [
-                'id' => $product->getIdProduct(),
-                'name' => $product->getName(),
-                'description' => $product->getDescription(),
-                'price' => $product->getPrice(),
-                'categories' => $product->getCategory()->toArray(),
-                'image_url' => $product->getImageUrl(),
-            ];
-        }, $fiveProducts);
+        // Create the native query
+        $query = $em->createNativeQuery($sql, $rsm);
+        $query->setParameter('productId', $product->getIdProduct());
+        $query->setParameter('limit', $limit, \PDO::PARAM_INT);
+
+        // Execute the query and get the results
+        $suggestedProducts = $query->getResult();
+
+        return $suggestedProducts;
     }
+
 
     public function findOneByIdAndReturnSuggestions($id, $limit = null )
     {   
@@ -251,6 +259,11 @@ class ProductRepository extends ServiceEntityRepository
 
         // Exécuter la requête et obtenir les résultats
         $suggestedProducts = $query->getResult();
+
+        if (count($suggestedProducts) < $limit ){
+            $moreSuggestions = $this->findSuggestions($product, $limit - count($suggestedProducts));
+            $suggestedProducts = array_merge($suggestedProducts, $moreSuggestions);
+        }
 
         return $suggestedProducts;
     }

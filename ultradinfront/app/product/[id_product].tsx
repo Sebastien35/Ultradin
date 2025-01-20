@@ -2,35 +2,51 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Image, ScrollView, Button, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { GetProducts } from "@/scripts/GetProducts";
+import { Dimensions } from "react-native";
 import Navbar from "@/components/ui/navbar";
 import Loader from "@/components/ui/loader";
 
 export default function Product() {
     const { id_product } = useLocalSearchParams();
     const [product, setProduct] = useState<{
-        id_product: number | null;
+        id: number | null;
         name: string;
         description: string;
         price: number | null;
         image_url: string;
+        categories: Array<string>; // Assuming categories as strings for simplicity
     }>({
-        id_product: null,
+        id: null,
         name: "",
         description: "",
         price: null,
         image_url: "",
+        categories: [],
     });
-    const [suggestions, setSuggestions] = useState([]);
+
+    const [suggestions, setSuggestions] = useState<{
+        id: number;
+        name: string;
+        price: number | null;
+        image_url: string;
+    }[]>([]);
     const [error, setError] = useState("");
 
-    const fetchProduct = async (id_product) => {
-        const FetchProduct = await GetProducts(id_product);
+    const fetchProduct = async (id: number) => {
+        const FetchProduct = await GetProducts(id);
         if (FetchProduct.status === "OK") {
-            setProduct(FetchProduct.data);
-            setSuggestions(FetchProduct.data.suggestions || []);
+            const data = FetchProduct.data;
+            setProduct({
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                price: data.price,
+                image_url: data.image_url,
+                categories: data.categories || [],
+            });
+            setSuggestions(data.suggestions || []);
         } else {
             setError("Error fetching product");
-            console.error(FetchProduct.data);
         }
     };
 
@@ -51,7 +67,7 @@ export default function Product() {
         );
     }
 
-    if (!product || !product.id_product) {
+    if (!product || !product.id) {
         return (
             <View style={styles.body}>
                 <Loader />
@@ -95,11 +111,11 @@ export default function Product() {
             </View>
 
             {/* Suggestions Section */}
+            <Text style={styles.suggestionsTitle}>You might also like:</Text>
             <View style={styles.suggestionsContainer}>
-                <Text style={styles.suggestionsTitle}>You might also like:</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     {suggestions.map((suggestion) => (
-                        <View key={suggestion.id_product} style={styles.suggestionCard}>
+                        <View key={suggestion.id} style={styles.suggestionCard}>
                             <Image
                                 source={{ uri: suggestion.image_url }}
                                 style={styles.suggestionImage}
@@ -117,6 +133,8 @@ export default function Product() {
     );
 }
 
+
+const screenWidth = Dimensions.get("window").width; 
 const styles = StyleSheet.create({
     body: {
         flex: 1,
@@ -173,6 +191,9 @@ const styles = StyleSheet.create({
     suggestionsContainer: {
         marginTop: 20,
         padding: 10,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
     },
     suggestionsTitle: {
         fontSize: 18,
@@ -189,11 +210,11 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
         elevation: 3,
-        width: 150,
+        width: screenWidth * 0.18, 
     },
     suggestionImage: {
         width: "100%",
-        height: 100,
+        height: screenWidth * 0.1, // Dynamic height based on screen width
         borderRadius: 5,
         marginBottom: 5,
     },
