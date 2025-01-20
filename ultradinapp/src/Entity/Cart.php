@@ -25,7 +25,7 @@ class Cart
     /**
      * @var Collection<int, product>
      */
-    #[ORM\ManyToMany(targetEntity: product::class)]
+    #[ORM\ManyToMany(targetEntity: Product::class)]
     #[ORM\JoinTable(
         name: "cart_product",
         joinColumns: [
