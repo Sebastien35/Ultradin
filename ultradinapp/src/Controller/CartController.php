@@ -25,6 +25,7 @@ class CartController extends AbstractController
         try{
             $cart = new Cart();
             $computedPrice = 0;
+            
             forEach($data['products'] as $product){
                 $productId = isset($product['id']) ? $product['id'] : throwException(new \Exception('Product ID is required'));
                 
@@ -36,6 +37,11 @@ class CartController extends AbstractController
         } catch (\Exception $e){
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+    }
+
+    #[Route('/my-cart', name:'my-cart', methods: ['POST','DELETE'])]
+    public function userCartInteractio(){
 
     }
 }

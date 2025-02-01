@@ -27,11 +27,11 @@ security:
                 password_path: password
 
         # Firewall pour toutes les autres routes
-        api:
-            pattern: ^/
-            stateless: true
-            provider: app_user_provider
-            jwt: ~
+        # api:
+        #     pattern: ^/
+        #     stateless: true
+        #     provider: app_user_provider
+        #     jwt: ~
 
     # Contrôle d'accès pour sécuriser les routes
     access_control:
