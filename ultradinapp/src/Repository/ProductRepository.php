@@ -207,10 +207,11 @@ class ProductRepository extends ServiceEntityRepository
         $arraySuggestions = [];
         foreach ($suggestions as $suggestion) {
             $suggestionObject = [];
-            $suggestionObject['id'] = $suggestion->getIdProduct(); // Utilisation de l'opérateur '->' et de la méthode getter appropriée
-            $suggestionObject['name'] = $suggestion->getName(); // Utilisation de la méthode getter appropriée
-            $suggestionObject['price'] = $suggestion->getPrice(); // Utilisation de la méthode getter appropriée
-            $suggestionObject['image_url'] = $suggestion->getImageUrl(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['id']         = $suggestion->getIdProduct(); // Utilisation de l'opérateur '->' et de la méthode getter appropriée
+            $suggestionObject['name']       = $suggestion->getName(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['price']      = $suggestion->getPrice(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['image_url']  = $suggestion->getImageUrl(); // Utilisation de la méthode getter appropriée
+            $suggestionObject['price_year'] = $suggestion->getPriceYear();
 
             $arraySuggestions[] = $suggestionObject;
         }
@@ -220,6 +221,7 @@ class ProductRepository extends ServiceEntityRepository
             'name' => $product->getName(),
             'description' => $product->getDescription(),
             'price' => $product->getPrice(),
+            'price_year' => $product->getPriceYear(),
             'image_url' => $product->getImageUrl(),
             'categories' => array_map(fn($category) => $category->getName(), $product->getCategory()->toArray()),
             'suggestions' => $arraySuggestions
