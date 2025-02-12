@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from "react-native";
 import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
 import { useRouter } from "expo-router";
@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
+        paddingBottom: 39,
     },
     title: {
         fontSize: 24,
@@ -67,10 +68,20 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     cardContainer: {
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: 20,
         paddingBottom: 20,
+        maxWidth: 1200,
+        marginHorizontal: "auto",
+        
     },
     card: {
         backgroundColor: "#fff",
+        width: "30%",
+        height: 300,
         borderRadius: 8,
         padding: 15,
         marginBottom: 10,

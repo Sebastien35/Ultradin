@@ -99,11 +99,11 @@ export default function Product() {
 
                 <View style={styles.actionsContainer}>
                     <Button
-                        title="Add to Cart"
+                        title="Subscribe now"
                         onPress={() => Alert.alert("Cart", `${product.name} added to cart`)}
                     />
                     <Button
-                        title="Buy Now"
+                        title="Try Now"
                         color="orange"
                         onPress={() => Alert.alert("Buy Now", `Proceeding to buy ${product.name}`)}
                     />
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     title: {
-        fontSize: 22,
+        fontSize: 30,
         fontWeight: "bold",
         marginBottom: 10,
         textAlign: "center",
