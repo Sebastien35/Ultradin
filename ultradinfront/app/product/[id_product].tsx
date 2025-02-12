@@ -83,24 +83,47 @@ export default function Product() {
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
-                {product.image_url && (
-                    <Image
-                        source={{ uri: product.image_url }}
-                        style={styles.productImage}
-                        resizeMode="contain"
-                    />
-                )}
+
+                <Text style={styles.title}>{product.name}</Text>
+                <View style={styles.detailsContainer}>
+                    <View style={styles.detailsContainerText}>
+                        <Text style={styles.h2Title}>Description</Text>
+                        <Text style={styles.description}>
+                            {product.description || "No description available."}
+                        </Text>
+                    </View>
+
+                    {product.image_url && (
+                        <Image
+                            source={{ uri: product.image_url }}
+                            style={styles.productImage}
+                            resizeMode="contain"
+                        />
+                    )}
+                </View>
 
                 <View style={styles.detailsContainer}>
-                    <Text style={styles.title}>{product.name}</Text>
+                    {product.image_url && (
+                        <Image
+                            source={{ uri: product.image_url }}
+                            style={styles.productImage}
+                            resizeMode="contain"
+                        />
+                    )}
+                    <View style={styles.detailsContainerText}>
+                        <Text style={styles.h2Title}>Caractéristiques techniques</Text>
+                        <Text style={[styles.description, styles.descriptionRight]}>
+                            {product.description || "No description available."}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.priceContainer}>
                     <Text style={styles.price}>
                         {product.price ? `$${product.price.toFixed(2)}` : "Price not available"}
                     </Text>
                     <Text style={styles.description}>
                         {product.price_year || "Contact us for annual price."}
-                    </Text>
-                    <Text style={styles.description}>
-                        {product.description || "No description available."}
                     </Text>
                 </View>
 
@@ -159,16 +182,33 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     productImage: {
-        width: "100%",
+        width: "40%",
         height: 300,
         marginBottom: 15,
     },
     detailsContainer: {
-        marginBottom: 15,
+        marginBottom: 40,
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    detailsContainerText: {
+        width: "60%",
     },
     title: {
         fontSize: 30,
         fontWeight: "bold",
+        marginBottom: 50,
+        textAlign: "center",
+    },
+    h2Title: {
+        fontSize: 30,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    priceContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
         marginBottom: 10,
         textAlign: "center",
     },
@@ -182,8 +222,14 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 16,
         color: "#555",
+        marginTop: 40,
         marginBottom: 10,
-        textAlign: "center",
+        alignSelf: "center",
+        marginRight: 20,
+    },
+    descriptionRight: {
+        marginLeft: 20,
+        marginRight: 0,
     },
     actionsContainer: {
         flexDirection: "row",
