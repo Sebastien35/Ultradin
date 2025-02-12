@@ -60,12 +60,18 @@ class ProductController extends AbstractController
     public function getAllProducts(SerializerInterface $serializer, ProductRepository $pr): JsonResponse
     {
         $products = $pr->findAll();
+        $topSales = $pr->getTopSales();
+
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
-        $products['top_sales'] = $pr->getTopSales();
-        $jsonProducts = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
-        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+        $responseData = [
+            'products' => $products,
+            'top_sales' => $topSales
+        ];
+        $jsonResponse = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        
+        return new JsonResponse(json_decode($jsonResponse), 200, ['Content-Type' => 'application/json']);
     }
 
 

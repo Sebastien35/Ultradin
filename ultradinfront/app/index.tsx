@@ -12,11 +12,13 @@ export default function Home() {
 
     const fetchProducts = async () => {
         const FetchProducts = await GetProducts();
-        if (FetchProducts.status === "OK") {
-            setProducts(FetchProducts.data);
+        console.log("FetchProducts:", FetchProducts);
+    
+        if (FetchProducts.status === "OK" && Array.isArray(FetchProducts.data.products)) {
+            setProducts(FetchProducts.data.products);
         } else {
             setError("Error fetching products");
-            console.error(FetchProducts.data);
+            console.error("FetchProducts.data.products is not an array:", FetchProducts.data.products);
         }
     };
 
