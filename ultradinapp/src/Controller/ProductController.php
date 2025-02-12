@@ -57,12 +57,13 @@ class ProductController extends AbstractController
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
-    public function getAllProducts(SerializerInterface $serializer): JsonResponse
+    public function getAllProducts(SerializerInterface $serializer, ProductRepository $pr): JsonResponse
     {
-        $products = $this->entityManager->getRepository(Product::class)->findAll();
+        $products = $pr->findAll();
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
+        $products['top_sales'] = $pr->getTopSales();
         $jsonProducts = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
     }

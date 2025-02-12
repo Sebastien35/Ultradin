@@ -75,6 +75,9 @@ class Product
         $this->category = new ArrayCollection();
     }
 
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: "products")]
+    private Collection $orders;
+
     public function getIdProduct(): ?int
     {
         return $this->id_product;

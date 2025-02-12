@@ -190,7 +190,7 @@ class ProductRepository extends ServiceEntityRepository
 
 
     public function findOneByIdAndReturnSuggestions($id, $limit = null )
-    {   
+    {
 
         if($limit == null){
             $limit = 3;
@@ -231,6 +231,17 @@ class ProductRepository extends ServiceEntityRepository
         
     }
 
+    /**
+     * @param Product $product
+     * @param int $limit
+     * @return array
+     * 
+     * Renvoie les suggestion basés sur les associations entre les produits dans la table panier
+     * 
+     * @throws \Doctrine\DBAL\Driver\Exception
+     * 
+     * 
+     */
     public function getSuggestionsV2(Product $product, int $limit = null): array
     {
         $em = $this->getEntityManager();
@@ -268,6 +279,28 @@ class ProductRepository extends ServiceEntityRepository
         }
 
         return $suggestedProducts;
+    }
+
+    /**
+     * @param int $limit
+     * 
+     * Renvoie les produits les plus vendus depuis la table product & cart-product
+     * 
+     **/
+    public function getTopSales($limit = 5)
+    {
+        $entityManager = $this->getEntityManager();
+        $query = $query = $entityManager->createQuery(
+            'SELECT p FROM App\Entity\Product p
+            JOIN p.orders o
+            WHERE o.status != :pending AND o.status != :cancelled
+            GROUP BY p.id_product
+            ORDER BY COUNT(o.id) DESC'
+        )
+        ->setParameter('pending', 'pending')
+        ->setParameter('cancelled', 'cancelled')
+        ->setMaxResults($limit);
+        return $query->getResult();
     }
 
 
