@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated, Image } from "react-native";
 import { GetProducts } from "@/scripts/GetProducts";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 interface Product {
     id_product: number;
     name: string;
     description?: string;
+    price: number;
+    image: string;
 }
 
 export default function ProductCarousel() {
     const [products, setProducts] = useState<Product[]>([]);
     const [error, setError] = useState("");
     const scrollViewRef = useRef<ScrollView | null>(null);
-    const [currentIndex, setCurrentIndex] = useState(0);
 
     const router = useRouter();
-    const itemWidth = 220; // Largeur d'une carte + marge
-    const visibleItems = 5; // Nombre d'éléments visibles
+    const itemWidth = 220;
+    const visibleItems = 5;
     const totalItems = products.length;
 
     useEffect(() => {
@@ -34,38 +34,17 @@ export default function ProductCarousel() {
         fetchProducts();
     }, []);
 
-    const scrollRight = () => {
-        if (scrollViewRef.current && currentIndex < totalItems - visibleItems) {
-            const newIndex = currentIndex + 1;
-            setCurrentIndex(newIndex);
-            scrollViewRef.current.scrollTo({ x: newIndex * itemWidth, animated: true });
-        }
-    };
-
-    const scrollLeft = () => {
-        if (scrollViewRef.current && currentIndex > 0) {
-            const newIndex = currentIndex - 1;
-            setCurrentIndex(newIndex);
-            scrollViewRef.current.scrollTo({ x: newIndex * itemWidth, animated: true });
-        }
-    };
-
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Produits</Text>
             {error ? (
                 <Text style={styles.error}>{error}</Text>
             ) : (
                 <View style={styles.carouselWrapper}>
-                    <TouchableOpacity onPress={scrollLeft} style={[styles.arrowButton, currentIndex === 0 && styles.disabledButton]}>
-                        <Ionicons name="chevron-back" size={32} color={currentIndex === 0 ? "#ccc" : "black"} />
-                    </TouchableOpacity>
-
                     <ScrollView
                         ref={scrollViewRef}
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        scrollEnabled={true} // Désactivation du défilement manuel
+                        scrollEnabled={false}
                         contentContainerStyle={styles.scrollContainer}
                     >
                         {products.map((product) => (
@@ -76,13 +55,10 @@ export default function ProductCarousel() {
                             >
                                 <Text style={styles.cardTitle}>{product.name}</Text>
                                 <Text style={styles.cardDescription}>{product.description || "No description available."}</Text>
+                                <Text style={styles.cardPrice}>{product.price}$</Text>
                             </TouchableOpacity>
                         ))}
                     </ScrollView>
-
-                    <TouchableOpacity onPress={scrollRight} style={[styles.arrowButton, currentIndex >= totalItems - visibleItems && styles.disabledButton]}>
-                        <Ionicons name="chevron-forward" size={32} color={currentIndex >= totalItems - visibleItems ? "#ccc" : "black"} />
-                    </TouchableOpacity>
                 </View>
             )}
         </View>
@@ -131,8 +107,29 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#555",
     },
-    arrowButton: {
+    cardPrice: {
+        fontSize: 14,
+        color: "#134ecd",
+        position: "absolute",
+        bottom: 15,
+    },
+    arrowLeft: {
+        position: "absolute",
+        left: 10,
+        top: "50%",
+        transform: [{ translateY: -12 }],
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         padding: 10,
+        borderRadius: 50,
+    },
+    arrowRight: {
+        position: "absolute",
+        right: 10,
+        top: "50%",
+        transform: [{ translateY: -12 }],
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        padding: 10,
+        borderRadius: 50,
     },
     disabledButton: {
         opacity: 0.5,
