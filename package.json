@@ -3,7 +3,10 @@
     "gulp": "^5.0.0"
   },
   "dependencies": {
+    "@coreui/react": "^5.5.0",
     "cors": "^2.8.5",
+    "framer-motion": "^12.4.2",
+    "next": "^15.1.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-native-keychain": "^9.2.2"
