@@ -4,6 +4,7 @@ import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
 import { useRouter } from "expo-router";
 import Footer from "@/components/ui/footer";
+import ProductCarousel from "@/components/ui/carrousel";
 
 export default function Home() {
     const [products, setProducts] = useState<{ id_product: number; name: string; description?: string }[]>([]);
@@ -27,7 +28,7 @@ export default function Home() {
     return (
         <View style={styles.body}>
             <NavBar />
-            <Text style={styles.title}>PAGE ACCUEIL</Text>
+            <ProductCarousel />
             {error ? (
                 <Text style={styles.error}>{error}</Text>
             ) : (

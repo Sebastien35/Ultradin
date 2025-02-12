@@ -14,7 +14,8 @@ export default function Product() {
         description: string;
         price: number | null;
         image_url: string;
-        categories: Array<string>; // Assuming categories as strings for simplicity
+        categories: Array<string>;
+        price_year: number | null; // Assuming categories as strings for simplicity
     }>({
         id: null,
         name: "",
@@ -22,6 +23,8 @@ export default function Product() {
         price: null,
         image_url: "",
         categories: [],
+        price_year: null
+
     });
 
     const [suggestions, setSuggestions] = useState<{
@@ -43,6 +46,7 @@ export default function Product() {
                 price: data.price,
                 image_url: data.image_url,
                 categories: data.categories || [],
+                price_year: data.price_year || null
             });
             setSuggestions(data.suggestions || []);
         } else {
@@ -91,6 +95,9 @@ export default function Product() {
                     <Text style={styles.title}>{product.name}</Text>
                     <Text style={styles.price}>
                         {product.price ? `$${product.price.toFixed(2)}` : "Price not available"}
+                    </Text>
+                    <Text style={styles.description}>
+                        {product.price_year || "Contact us for annual price."}
                     </Text>
                     <Text style={styles.description}>
                         {product.description || "No description available."}
