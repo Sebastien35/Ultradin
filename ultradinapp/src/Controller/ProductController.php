@@ -36,21 +36,21 @@ class ProductController extends AbstractController
             return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
         try{
-        $product = new Product();
-        $product->setName($data['name']);
-        $product->setDescription($data['description'] ?? null);
-        $product->setImageUrl($data['image_url'] ?? null);
-        $product->setPrice($data['price']);
-        $product->setDateCreated(new \DateTime());
-        $product->setStock($data['stock']);
-        $product->setAvailability($data['availability']);
-        $product->setTechnicalFeatures($data['tech_features'] ?? '');
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-        return $this->json([
-            'message' => 'Product created successfully',
-            'id' => $product->getIdProduct(),
-        ], Response::HTTP_CREATED);
+            $product = new Product();
+            $product->setName($data['name']);
+            $product->setDescription($data['description'] ?? null);
+            $product->setImageUrl($data['image_url'] ?? null);
+            $product->setPrice($data['price']);
+            $product->setDateCreated(new \DateTime());
+            $product->setStock($data['stock']);
+            $product->setAvailability($data['availability']);
+            $product->setTechnicalFeatures($data['tech_features'] ?? '');
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+            return $this->json([
+                'message' => 'Product created successfully',
+                'id' => $product->getIdProduct(),
+            ], Response::HTTP_CREATED);
         } catch (Exception $e){
             return $e->getMessage();
         }
