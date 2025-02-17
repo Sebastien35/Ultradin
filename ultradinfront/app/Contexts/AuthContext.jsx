@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     if (isLoading) {
-        return null; // You can replace this with a loading spinner if desired
+        return null; 
     }
 
     return (
