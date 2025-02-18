@@ -90,4 +90,31 @@ class TestController extends AbstractController
     }
         return new Response('Order created successfully');
     }
+
+    #[Route('/test-mail', name: 'app_test_mail')]
+    public function mailTesting(){
+        $html = "";
+        $html .= CommonController::getHeaderMail();
+        $html .= file_get_contents(dirname(__DIR__, 2) . '/config/mails/welcome_mail.html');
+        $html .= CommonController::getFooterMail();
+
+        $arrayFind = array(
+            '[#COMPANY_NAME#]',
+            '[#COMPANY_ADDRESS#]',
+            '[#COMPANY_EMAIL#]',
+            '[#COMPANY_PHONE#]',
+            '[#WEBSITE_URL#]',
+        );
+
+        $arrayReplace = array(
+            COMPANY_NAME,
+            COMPANY_ADDRESS,
+            COMPANY_EMAIL,
+            COMPANY_PHONE,
+            WEBSITE_URL,
+        );
+
+        $html = str_replace($arrayFind, $arrayReplace, $html);
+        return new Response($html);
+    }
 }

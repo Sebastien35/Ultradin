@@ -27,7 +27,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
             $order->setOrderUuid($faker->uuid);
             $order->setTotalPrice($faker->randomFloat(2, 20, 500));
             $order->setStatus($faker->randomElement(['pending', 'paid', 'shipped', 'delivered']));
-            $order->setEta($faker->dateTimeThisMonth());
+            $order->setEta($faker->optional(0.9, new \DateTime())->dateTimeThisMonth());
             $order->setUser($users[array_rand($users)]);
 
             $order->addProduct($products[0]);

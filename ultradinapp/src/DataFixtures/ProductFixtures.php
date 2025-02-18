@@ -72,21 +72,6 @@ class ProductFixtures extends Fixture
         }
         $manager->flush();
 
-        for ($i = 0; $i < 50; $i++) {
-            shuffle($products);
-            $order = new Order();
-            $order->setDateConfirmed($faker->dateTimeThisYear());
-            $order->setOrderUuid($faker->uuid);
-            $order->setTotalPrice($faker->randomFloat(2, 20, 500));
-            $order->setStatus($faker->randomElement(['pending', 'paid', 'shipped', 'delivered']));
-
-            $order->addProduct($products[0]);
-            if (count($products) > 1) {
-                $order->addProduct($products[1]);
-            }
-            $manager->persist($order);
-        }
-        $manager->flush();
     }
 
 }
