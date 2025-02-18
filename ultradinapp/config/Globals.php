@@ -11,7 +11,7 @@ $company_capital = "1000€";
 $company_rcs = "Paris 123 456 789";
 $company_ape = "1234Z";
 $company_legal = "SAS CYNA";
-$website_url = $_SERVER['HTTP_HOST'];
+$website_url = "https://cyna.com";
 
 define('COMPANY_NAME', $company_name);
 define('COMPANY_EMAIL', $company_email);

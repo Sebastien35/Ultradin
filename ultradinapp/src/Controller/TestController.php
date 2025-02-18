@@ -10,6 +10,7 @@ use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Order;
+use App\Repository\UsersVerificationsRepository;
 
 class TestController extends AbstractController
 {
@@ -92,29 +93,14 @@ class TestController extends AbstractController
     }
 
     #[Route('/test-mail', name: 'app_test_mail')]
-    public function mailTesting(){
-        $html = "";
-        $html .= CommonController::getHeaderMail();
-        $html .= file_get_contents(dirname(__DIR__, 2) . '/config/mails/welcome_mail.html');
-        $html .= CommonController::getFooterMail();
+    public function mailTesting(UserRepository $userRepo, UsersVerificationsRepository $uvr){
+        $user = $userRepo->findOneBy(['email' => 'Sborgne@live.fr']);
+        if(!$user){
+            return new Response('User not found');
+        }
+        $uvr->createEmailVerification($user);
+        return new Response('Email verification created');
 
-        $arrayFind = array(
-            '[#COMPANY_NAME#]',
-            '[#COMPANY_ADDRESS#]',
-            '[#COMPANY_EMAIL#]',
-            '[#COMPANY_PHONE#]',
-            '[#WEBSITE_URL#]',
-        );
-
-        $arrayReplace = array(
-            COMPANY_NAME,
-            COMPANY_ADDRESS,
-            COMPANY_EMAIL,
-            COMPANY_PHONE,
-            WEBSITE_URL,
-        );
-
-        $html = str_replace($arrayFind, $arrayReplace, $html);
-        return new Response($html);
+        
     }
 }
