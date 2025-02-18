@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use App\Service\EncryptionService;
 
 class SecurityController extends AbstractController
-{   
+{
 
     private UserPasswordHasherInterface $passwordHasher;
     private JWTTokenManagerInterface $jwtManager;
@@ -52,7 +52,7 @@ class SecurityController extends AbstractController
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
             return new JsonResponse(['error' => 'Invalid login credentials.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
-        $token = $this->jwtManager->create($user);  
+        $token = $this->jwtManager->create($user);
         return new JsonResponse(['token' => $token]);
     }
 
