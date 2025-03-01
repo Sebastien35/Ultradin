@@ -36,35 +36,42 @@ class ProductController extends AbstractController
             return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
         try{
-        $product = new Product();
-        $product->setName($data['name']);
-        $product->setDescription($data['description'] ?? null);
-        $product->setImageUrl($data['image_url'] ?? null);
-        $product->setPrice($data['price']);
-        $product->setDateCreated(new \DateTime());
-        $product->setStock($data['stock']);
-        $product->setAvailability($data['availability']);
-        $product->setTechnicalFeatures($data['tech_features'] ?? '');
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-        return $this->json([
-            'message' => 'Product created successfully',
-            'id' => $product->getIdProduct(),
-        ], Response::HTTP_CREATED);
+            $product = new Product();
+            $product->setName($data['name']);
+            $product->setDescription($data['description'] ?? null);
+            $product->setImageUrl($data['image_url'] ?? null);
+            $product->setPrice($data['price']);
+            $product->setDateCreated(new \DateTime());
+            $product->setStock($data['stock']);
+            $product->setAvailability($data['availability']);
+            $product->setTechnicalFeatures($data['tech_features'] ?? '');
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+            return $this->json([
+                'message' => 'Product created successfully',
+                'id' => $product->getIdProduct(),
+            ], Response::HTTP_CREATED);
         } catch (Exception $e){
             return $e->getMessage();
         }
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
-    public function getAllProducts(SerializerInterface $serializer): JsonResponse
+    public function getAllProducts(SerializerInterface $serializer, ProductRepository $pr): JsonResponse
     {
-        $products = $this->entityManager->getRepository(Product::class)->findAll();
+        $products = $pr->findAll();
+        $topSales = $pr->getTopSales();
+
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
-        $jsonProducts = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
-        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+        $responseData = [
+            'products' => $products,
+            'top_sales' => $topSales
+        ];
+        $jsonResponse = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        
+        return new JsonResponse(json_decode($jsonResponse), 200, ['Content-Type' => 'application/json']);
     }
 
 

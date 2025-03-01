@@ -2,32 +2,60 @@ import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Image, ScrollView, Button, Alert } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { GetProducts } from "@/scripts/GetProducts";
+import { Dimensions } from "react-native";
 import Navbar from "@/components/ui/navbar";
 import Loader from "@/components/ui/loader";
 
 export default function Product() {
-    const { id_product } = useLocalSearchParams(); // Extract 'idProduct' from route parameters
-    const [product, setProduct] = useState<{ 
-        id_product: number; 
-        name: string; 
-        description?: string; 
-        price?: number; 
-        image_url?: string; 
-    } | null>(null);
+    const { id_product } = useLocalSearchParams();
+    const [product, setProduct] = useState<{
+        id: number | null;
+        name: string;
+        description: string;
+        price: number | null;
+        image_url: string;
+        categories: Array<string>;
+        price_year: number | null; // Assuming categories as strings for simplicity
+    }>({
+        id: null,
+        name: "",
+        description: "",
+        price: null,
+        image_url: "",
+        categories: [],
+        price_year: null
+
+    });
+
+    const [suggestions, setSuggestions] = useState<{
+        id: number;
+        name: string;
+        price: number | null;
+        image_url: string;
+    }[]>([]);
     const [error, setError] = useState("");
 
-    const fetchProduct = async (id_product: number) => {
-        const FetchProduct = await GetProducts(id_product);
+    const fetchProduct = async (id: number) => {
+        const FetchProduct = await GetProducts(id);
         if (FetchProduct.status === "OK") {
-            setProduct(FetchProduct.data);
+            const data = FetchProduct.data;
+            setProduct({
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                price: data.price,
+                image_url: data.image_url,
+                categories: data.categories || [],
+                price_year: data.price_year || null
+            });
+            setSuggestions(data.suggestions || []);
         } else {
             setError("Error fetching product");
-            console.error(FetchProduct.data);
         }
     };
 
     useEffect(() => {
-        const productId = parseInt(id_product as string);
+        const productId = parseInt(Array.isArray(id_product) ? id_product[0] : id_product, 10);
         if (!isNaN(productId)) {
             fetchProduct(productId);
         } else {
@@ -43,7 +71,7 @@ export default function Product() {
         );
     }
 
-    if (!product) {
+    if (!product || !product.id) {
         return (
             <View style={styles.body}>
                 <Loader />
@@ -56,41 +84,64 @@ export default function Product() {
             <Navbar />
             <View style={styles.productContainer}>
                 {product.image_url && (
-                    <Image 
-                        source={{ uri: product.image_url }} 
-                        style={styles.productImage} 
-                        resizeMode="contain" 
+                    <Image
+                        source={{ uri: product.image_url }}
+                        style={styles.productImage}
+                        resizeMode="contain"
                     />
                 )}
 
-                {/* Product Details */}
                 <View style={styles.detailsContainer}>
                     <Text style={styles.title}>{product.name}</Text>
                     <Text style={styles.price}>
                         {product.price ? `$${product.price.toFixed(2)}` : "Price not available"}
                     </Text>
                     <Text style={styles.description}>
+                        {product.price_year || "Contact us for annual price."}
+                    </Text>
+                    <Text style={styles.description}>
                         {product.description || "No description available."}
                     </Text>
                 </View>
 
-                {/* Action Buttons */}
                 <View style={styles.actionsContainer}>
-                    <Button 
-                        title="Add to Cart" 
-                        onPress={() => Alert.alert("Cart", `${product.name} added to cart`)} 
+                    <Button
+                        title="Add to Cart"
+                        onPress={() => Alert.alert("Cart", `${product.name} added to cart`)}
                     />
-                    <Button 
-                        title="Buy Now" 
-                        color="orange" 
-                        onPress={() => Alert.alert("Buy Now", `Proceeding to buy ${product.name}`)} 
+                    <Button
+                        title="Buy Now"
+                        color="orange"
+                        onPress={() => Alert.alert("Buy Now", `Proceeding to buy ${product.name}`)}
                     />
                 </View>
+            </View>
+
+            {/* Suggestions Section */}
+            <Text style={styles.suggestionsTitle}>You might also like:</Text>
+            <View style={styles.suggestionsContainer}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {suggestions.map((suggestion) => (
+                        <View key={suggestion.id} style={styles.suggestionCard}>
+                            <Image
+                                source={{ uri: suggestion.image_url }}
+                                style={styles.suggestionImage}
+                                resizeMode="cover"
+                            />
+                            <Text style={styles.suggestionName}>{suggestion.name}</Text>
+                            <Text style={styles.suggestionPrice}>
+                                {suggestion.price ? `$${suggestion.price.toFixed(2)}` : "Price not available"}
+                            </Text>
+                        </View>
+                    ))}
+                </ScrollView>
             </View>
         </ScrollView>
     );
 }
 
+
+const screenWidth = Dimensions.get("window").width; 
 const styles = StyleSheet.create({
     body: {
         flex: 1,
@@ -143,5 +194,46 @@ const styles = StyleSheet.create({
         color: "red",
         fontSize: 16,
         textAlign: "center",
+    },
+    suggestionsContainer: {
+        marginTop: 20,
+        padding: 10,
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-evenly",
+    },
+    suggestionsTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    suggestionCard: {
+        backgroundColor: "#FFF",
+        borderRadius: 10,
+        padding: 10,
+        marginRight: 10,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 4,
+        elevation: 3,
+        width: screenWidth * 0.18, 
+    },
+    suggestionImage: {
+        width: "100%",
+        height: screenWidth * 0.1, // Dynamic height based on screen width
+        borderRadius: 5,
+        marginBottom: 5,
+    },
+    suggestionName: {
+        fontSize: 14,
+        fontWeight: "bold",
+        textAlign: "center",
+    },
+    suggestionPrice: {
+        fontSize: 12,
+        color: "green",
+        textAlign: "center",
+        marginTop: 5,
     },
 });

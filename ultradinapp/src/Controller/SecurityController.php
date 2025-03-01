@@ -52,9 +52,8 @@ class SecurityController extends AbstractController
         if (!$this->passwordHasher->isPasswordValid($user, $password)) {
             return new JsonResponse(['status' => 0, 'message' => 'Invalid login credentials.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
-        $token = $this->jwtManager->create($user);
-        error_log($token);  
-        return new JsonResponse(['status' => 1, 'message' => 'OK', 'token' => $token]);
+        $token = $this->jwtManager->create($user);  
+        return new JsonResponse(['token' => $token]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]

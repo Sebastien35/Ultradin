@@ -25,7 +25,7 @@ class Cart
     /**
      * @var Collection<int, product>
      */
-    #[ORM\ManyToMany(targetEntity: product::class)]
+    #[ORM\ManyToMany(targetEntity: Product::class)]
     #[ORM\JoinTable(
         name: "cart_product",
         joinColumns: [
@@ -36,6 +36,10 @@ class Cart
         ]
     )]
     private Collection $products;
+
+    #[ORM\OneToOne(inversedBy: 'Cart', cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id_user', nullable: false)]
+    private ?User $user = null;
 
     public function __construct()
     {
@@ -103,6 +107,18 @@ class Cart
         }
 
         return $totalPrice;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $User): static
+    {
+        $this->user = $User;
+
+        return $this;
     }
 
     

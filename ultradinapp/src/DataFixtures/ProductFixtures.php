@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Faker\Factory;
 use App\Entity\Category;
 use Psr\Log\LoggerInterface;
+use App\Entity\Order;
 
 class ProductFixtures extends Fixture
 {
@@ -59,19 +60,31 @@ class ProductFixtures extends Fixture
             $manager->persist($category);
         }
         $manager->flush();
-
-        // Récupérer tous les produits et catégories depuis la base
         $products = $manager->getRepository(Product::class)->findAll();
         $categories = $manager->getRepository(Category::class)->findAll();
 
 
         foreach ($products as $product) {
-            // Shuffle the categories array
             shuffle($categories);
 
-            // Add the first two categories from the shuffled list
             $product->addCategory($categories[0]);
             $product->addCategory($categories[1]);
+        }
+        $manager->flush();
+
+        for ($i = 0; $i < 50; $i++) {
+            shuffle($products);
+            $order = new Order();
+            $order->setDateConfirmed($faker->dateTimeThisYear());
+            $order->setOrderUuid($faker->uuid);
+            $order->setTotalPrice($faker->randomFloat(2, 20, 500));
+            $order->setStatus($faker->randomElement(['pending', 'paid', 'shipped', 'delivered']));
+
+            $order->addProduct($products[0]);
+            if (count($products) > 1) {
+                $order->addProduct($products[1]);
+            }
+            $manager->persist($order);
         }
         $manager->flush();
     }
