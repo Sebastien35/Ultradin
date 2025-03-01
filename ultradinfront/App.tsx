@@ -1,5 +1,10 @@
 import { Stack } from "expo-router";
+import { AuthProvider } from '@/app/Contexts/AuthContext';
 
 export default function App() {
-    return <Stack />;
+    return (
+        <AuthProvider>
+            <Stack />
+        </AuthProvider>
+    );
 }

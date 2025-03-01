@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+
 import NavBar from "@/components/ui/navbar";
 import { GetProducts } from "@/scripts/GetProducts";
 import { useRouter } from "expo-router";

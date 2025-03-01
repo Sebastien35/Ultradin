@@ -1,9 +1,12 @@
-import React from "react";
+import React, {useContext} from "react";
+import {AuthContext} from '@/app/Contexts/AuthContext'
 import { Link, useRouter } from "expo-router";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import App from '@/App'
 
 const Navbar = () => {
     const router = useRouter();
+    const {user, logout} = useContext(AuthContext);
 
     return (
         <View style={styles.navbar}>
@@ -26,9 +29,16 @@ const Navbar = () => {
                 <TouchableOpacity onPress={() => router.push("/Search")}>
                     <Text style={styles.link}>Products</Text>
                 </TouchableOpacity>
+                {user ? (
+                <>
+                    <Text>Welcome, {user.username}!</Text>
+                    <TouchableOpacity onPress={() => router.push("/logout")}></TouchableOpacity>
+                </>
+            ) : (
                 <TouchableOpacity onPress={() => router.push("/login")}>
-                    <Text style={styles.link}>Account</Text>
+                    <Text style={styles.link}>Connexion</Text>
                 </TouchableOpacity>
+            )}
             </View>
         </View>
     );
