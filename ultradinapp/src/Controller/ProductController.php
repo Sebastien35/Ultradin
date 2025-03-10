@@ -69,9 +69,14 @@ class ProductController extends AbstractController
             'products' => $products,
             'top_sales' => $topSales
         ];
-        $jsonResponse = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        $json = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        $reponse = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
         
-        return new JsonResponse(json_decode($jsonResponse), 200, ['Content-Type' => 'application/json']);
+        $reponse->setPublic();
+        $reponse->setMaxAge(3600);
+        $reponse->setSharedMaxAge(3600);
+        return $reponse;
+
     }
 
 
@@ -95,7 +100,11 @@ class ProductController extends AbstractController
             case 'GET':
                 $product = $productRepository->findOneByIdAndReturnSuggestions($product->getIdProduct(), 5);
                 
-                return new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
+                $response = new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
+                $response->setPublic();
+                $response->setMaxAge(3600);
+                $response->setSharedMaxAge(3600);
+                return $response;
             case 'DELETE':
                 return $productRepository->deleteProduct($product);
             case 'PUT':
