@@ -11,4 +11,18 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "8082:3306"
-      
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+    ports:
+      - "8307:80"
+
+volumes:
+  db_data:
