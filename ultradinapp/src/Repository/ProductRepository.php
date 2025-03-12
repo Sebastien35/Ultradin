@@ -23,9 +23,9 @@ class ProductRepository extends ServiceEntityRepository
     public function updateProduct(array $data, Product $product): JsonResponse
     {
     try {
-        if (empty($data['name']) || !isset($data['price'], $data['stock'], $data['availability'])) {
+        if (empty($data['name']) || !isset($data['price'], $data['availability'])) {
             return new JsonResponse([
-                'error' => 'Missing required fields: name, price, stock, or availability',
+                'error' => 'Missing required fields: name, price, or availability',
             ], Response::HTTP_BAD_REQUEST);
         }
 
@@ -33,7 +33,6 @@ class ProductRepository extends ServiceEntityRepository
         $product->setDescription($data['description'] ?? $product->getDescription());
         $product->setImageUrl($data['image_url'] ?? $product->getImageUrl());
         $product->setPrice((float) $data['price'] ?? $product->getPrice());
-        $product->setStock((int) $data['stock'] ?? $product->getStock());
         $product->setAvailability((bool) $data['availability'] ?? $product->isAvailable());
         $product->setTechnicalFeatures($data['tech_features'] ?? $product->getTechnicalFeatures());
         $product->addCategory($data['category'] ?? $product->getCategory());
@@ -220,6 +219,7 @@ class ProductRepository extends ServiceEntityRepository
             'id' => $product->getIdProduct(),
             'name' => $product->getName(),
             'description' => $product->getDescription(),
+            'tech_features' => $product->getTechnicalFeatures(),
             'price' => $product->getPrice(),
             'price_year' => $product->getPriceYear(),
             'image_url' => $product->getImageUrl(),

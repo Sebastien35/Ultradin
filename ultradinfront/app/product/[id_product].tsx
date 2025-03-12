@@ -12,20 +12,22 @@ export default function Product() {
         id: number | null;
         name: string;
         description: string;
+        tech_features: string;
         price: number | null;
         image_url: string;
         categories: Array<string>;
-        price_year: number | null; // Assuming categories as strings for simplicity
+        price_year: number | null;
     }>({
         id: null,
         name: "",
         description: "",
+        tech_features: "",
         price: null,
         image_url: "",
         categories: [],
-        price_year: null
-
+        price_year: null,
     });
+    
 
     const [suggestions, setSuggestions] = useState<{
         id: number;
@@ -39,20 +41,23 @@ export default function Product() {
         const FetchProduct = await GetProducts(id);
         if (FetchProduct.status === "OK") {
             const data = FetchProduct.data;
+            console.log(data);
             setProduct({
                 id: data.id,
                 name: data.name,
                 description: data.description,
+                tech_features: data.tech_features,
                 price: data.price,
                 image_url: data.image_url,
                 categories: data.categories || [],
-                price_year: data.price_year || null
+                price_year: data.price_year || null,
             });
             setSuggestions(data.suggestions || []);
         } else {
             setError("Error fetching product");
         }
     };
+    
 
     useEffect(() => {
         const productId = parseInt(Array.isArray(id_product) ? id_product[0] : id_product, 10);
@@ -83,34 +88,56 @@ export default function Product() {
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
-                {product.image_url && (
-                    <Image
-                        source={{ uri: product.image_url }}
-                        style={styles.productImage}
-                        resizeMode="contain"
-                    />
-                )}
+                <Text style={styles.title}>{product.name}</Text>
+                <View style={styles.detailsContainer}>
+                    <View style={styles.detailsContainerText}>
+                        <Text style={styles.h2Title}>Description</Text>
+                        <Text style={styles.description}>
+                            {product.description || "No description available."}
+                        </Text>
+                    </View>
+
+                    {product.image_url && (
+                        <Image
+                            source={{ uri: product.image_url }}
+                            style={styles.productImage}
+                            resizeMode="contain"
+                        />
+                    )}
+                </View>
 
                 <View style={styles.detailsContainer}>
-                    <Text style={styles.title}>{product.name}</Text>
+                    {product.image_url && (
+                        <Image
+                            source={{ uri: product.image_url }}
+                            style={styles.productImage}
+                            resizeMode="contain"
+                        />
+                    )}
+                    <View style={styles.detailsContainerText}>
+                        <Text style={styles.h2Title}>Caractéristiques techniques</Text>
+                        <Text style={[styles.description, styles.descriptionRight]}>
+                            {product.tech_features || "No features available."}
+                        </Text>
+                    </View>
+                </View>
+
+                <View style={styles.priceContainer}>
                     <Text style={styles.price}>
                         {product.price ? `$${product.price.toFixed(2)}` : "Price not available"}
                     </Text>
                     <Text style={styles.description}>
                         {product.price_year || "Contact us for annual price."}
                     </Text>
-                    <Text style={styles.description}>
-                        {product.description || "No description available."}
-                    </Text>
                 </View>
 
                 <View style={styles.actionsContainer}>
                     <Button
-                        title="Add to Cart"
+                        title="Subscribe now"
                         onPress={() => Alert.alert("Cart", `${product.name} added to cart`)}
                     />
                     <Button
-                        title="Buy Now"
+                        title="Try Now"
                         color="orange"
                         onPress={() => Alert.alert("Buy Now", `Proceeding to buy ${product.name}`)}
                     />
@@ -143,6 +170,16 @@ export default function Product() {
 
 const screenWidth = Dimensions.get("window").width; 
 const styles = StyleSheet.create({
+    availabilityContainer: {
+        alignItems: "center",
+        marginVertical: 10,
+    },
+    availability: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#d9534f",
+    },
+    
     body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
@@ -159,16 +196,33 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     productImage: {
-        width: "100%",
+        width: "40%",
         height: 300,
         marginBottom: 15,
     },
     detailsContainer: {
-        marginBottom: 15,
+        marginBottom: 40,
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    detailsContainerText: {
+        width: "60%",
     },
     title: {
-        fontSize: 22,
+        fontSize: 30,
         fontWeight: "bold",
+        marginBottom: 50,
+        textAlign: "center",
+    },
+    h2Title: {
+        fontSize: 30,
+        fontWeight: "bold",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    priceContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
         marginBottom: 10,
         textAlign: "center",
     },
@@ -182,8 +236,14 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 16,
         color: "#555",
+        marginTop: 40,
         marginBottom: 10,
-        textAlign: "center",
+        alignSelf: "center",
+        marginRight: 20,
+    },
+    descriptionRight: {
+        marginLeft: 20,
+        marginRight: 0,
     },
     actionsContainer: {
         flexDirection: "row",

@@ -41,7 +41,6 @@ class ProductFixtures extends Fixture
             $product->setName($faker->company . ' SaaS Security');
             $product->setDescription($faker->sentence(10));
             $product->setImageUrl('https://placehold.co/600x400?font=roboto');
-            $product->setStock($faker->numberBetween(10, 100));
             $product->setDateCreated($faker->dateTimeThisYear());
             $product->setTechnicalFeatures($faker->paragraph(3));
             $product->setAvailability($faker->boolean());
