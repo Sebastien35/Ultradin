@@ -34,7 +34,7 @@ class Order
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false, referencedColumnName:'id_user')]
-    private ?user $user = null;
+    private ?User $user = null;
 
 
     #[ORM\ManyToMany(targetEntity: Product::class)]
