@@ -1,11 +1,5 @@
 {
   "devDependencies": {
     "gulp": "^5.0.0"
-  },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-native-keychain": "^9.2.2"
   }
 }
