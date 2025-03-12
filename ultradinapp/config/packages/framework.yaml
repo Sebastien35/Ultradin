@@ -5,6 +5,7 @@ framework:
 
     # Note that the session will be started ONLY if you read or write from it.
     session: true
+    http_cache: true
 
     #esi: true
     #fragments: true
@@ -14,3 +15,5 @@ when@test:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+
+

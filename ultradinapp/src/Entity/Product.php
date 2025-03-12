@@ -31,10 +31,6 @@ class Product
     private ?string $image_url = null;
 
     #[Groups(['product:read'])]
-    #[ORM\Column]
-    private ?int $stock = null;
-
-    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_created = null;
 
@@ -115,18 +111,6 @@ class Product
     public function setImageUrl(string $image_url): static
     {
         $this->image_url = $image_url;
-
-        return $this;
-    }
-
-    public function getStock(): ?int
-    {
-        return $this->stock;
-    }
-
-    public function setStock(int $stock): static
-    {
-        $this->stock = $stock;
 
         return $this;
     }

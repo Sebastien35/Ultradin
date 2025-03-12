@@ -16,8 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
-
-
+use OpenApi\Serializer;
 
 #[Route('/products', name: 'app_products_')]
 class ProductController extends AbstractController
@@ -42,7 +41,6 @@ class ProductController extends AbstractController
             $product->setImageUrl($data['image_url'] ?? null);
             $product->setPrice($data['price']);
             $product->setDateCreated(new \DateTime());
-            $product->setStock($data['stock']);
             $product->setAvailability($data['availability']);
             $product->setTechnicalFeatures($data['tech_features'] ?? '');
             $this->entityManager->persist($product);
@@ -69,9 +67,14 @@ class ProductController extends AbstractController
             'products' => $products,
             'top_sales' => $topSales
         ];
-        $jsonResponse = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        $json = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        $reponse = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
         
-        return new JsonResponse(json_decode($jsonResponse), 200, ['Content-Type' => 'application/json']);
+        $reponse->setPublic();
+        $reponse->setMaxAge(3600);
+        $reponse->setSharedMaxAge(3600);
+        return $reponse;
+
     }
 
 
@@ -93,9 +96,16 @@ class ProductController extends AbstractController
         }
         switch ($method) {
             case 'GET':
-                $product = $productRepository->findOneByIdAndReturnSuggestions($product->getIdProduct(), 5);
-                
-                return new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
+                $product = $productRepository->find($id);
+                if(!$product){
+                    return new JsonResponse(['error' => 'Product not found'], 404);
+                }
+                $json = $serializer->serialize($product, 'json', ['groups' => 'product:read']);
+                $response = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
+                $response->setPublic();
+                $response->setMaxAge(3600);
+                $response->setSharedMaxAge(3600);
+                return $response;
             case 'DELETE':
                 return $productRepository->deleteProduct($product);
             case 'PUT':
@@ -104,6 +114,26 @@ class ProductController extends AbstractController
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
+    }
+
+    #[Route('/{id}/suggestions', name: 'suggestions', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getProductSuggestions(
+        int $id,
+        SerializerInterface $serializer,
+        ProductRepository $productRepository
+    ): Response {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+
+        if(!$product){
+            return new JsonResponse(['error' => 'Product not found'], 404);
+        }
+        $products = $productRepository->getSuggestionsV2($product, 5);
+        $json = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
+        $response = new JsonResponse($json, 200, ['Content-Type' => 'application/json']);
+        $response->setPublic();
+        $response->setMaxAge(3600);
+
+        return $response;
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
@@ -156,8 +186,10 @@ class ProductController extends AbstractController
                 'name' => $product->getName(),
                 'category' => $product->getCategory(),
                 'description' => $product->getDescription(),
+                'tech_features' => $product->getTechnicalFeatures(),
                 'price_month' => $product->getPrice(),
                 'price_year' => $product->getPriceYear(),
+                'availability' => $product->getAvailability(),
             );
             $returnProducts[] = $productData;
         }

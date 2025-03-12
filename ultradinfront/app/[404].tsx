@@ -9,7 +9,7 @@ export default function NotFoundPage() {
                 <Navbar/>
                 <div style={styles.container}>
                     <Text style={styles.number}>404 </Text><br/>
-                    <Text style={styles.title}>Page not found (Espèce de gros nul tu sais pas écrire)</Text>
+                    <Text style={styles.title}>Page not found</Text>
                 </div>
             </View>
         </body>
