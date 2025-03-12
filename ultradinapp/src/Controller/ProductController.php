@@ -41,7 +41,6 @@ class ProductController extends AbstractController
             $product->setImageUrl($data['image_url'] ?? null);
             $product->setPrice($data['price']);
             $product->setDateCreated(new \DateTime());
-            $product->setStock($data['stock']);
             $product->setAvailability($data['availability']);
             $product->setTechnicalFeatures($data['tech_features'] ?? '');
             $this->entityManager->persist($product);
@@ -183,8 +182,10 @@ class ProductController extends AbstractController
                 'name' => $product->getName(),
                 'category' => $product->getCategory(),
                 'description' => $product->getDescription(),
+                'tech_features' => $product->getTechnicalFeatures(),
                 'price_month' => $product->getPrice(),
                 'price_year' => $product->getPriceYear(),
+                'availability' => $product->getAvailability(),
             );
             $returnProducts[] = $productData;
         }
