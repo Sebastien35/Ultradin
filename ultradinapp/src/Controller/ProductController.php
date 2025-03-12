@@ -16,8 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
-
-
+use OpenApi\Serializer;
 
 #[Route('/products', name: 'app_products_')]
 class ProductController extends AbstractController
@@ -98,8 +97,7 @@ class ProductController extends AbstractController
         }
         switch ($method) {
             case 'GET':
-                $product = $productRepository->findOneByIdAndReturnSuggestions($product->getIdProduct(), 5);
-                
+                $product = $productRepository->find($id);
                 $response = new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
                 $response->setPublic();
                 $response->setMaxAge(3600);
@@ -113,6 +111,26 @@ class ProductController extends AbstractController
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
+    }
+
+    #[Route('/{id}/suggestions', name: 'suggestions', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getProductSuggestions(
+        int $id,
+        SerializerInterface $serializer,
+        ProductRepository $productRepository
+    ): Response {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+
+        if(!$product){
+            return new JsonResponse(['error' => 'Product not found'], 404);
+        }
+        $products = $productRepository->getSuggestionsV2($product);
+        $json = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
+        $response = new JsonResponse($json, 200, ['Content-Type' => 'application/json']);
+        $response->setPublic();
+        $response->setMaxAge(3600);
+
+        return $response;
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
