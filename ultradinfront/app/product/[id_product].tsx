@@ -12,20 +12,22 @@ export default function Product() {
         id: number | null;
         name: string;
         description: string;
+        tech_features: string;
         price: number | null;
         image_url: string;
         categories: Array<string>;
-        price_year: number | null; // Assuming categories as strings for simplicity
+        price_year: number | null;
     }>({
         id: null,
         name: "",
         description: "",
+        tech_features: "",
         price: null,
         image_url: "",
         categories: [],
-        price_year: null
-
+        price_year: null,
     });
+    
 
     const [suggestions, setSuggestions] = useState<{
         id: number;
@@ -39,20 +41,23 @@ export default function Product() {
         const FetchProduct = await GetProducts(id);
         if (FetchProduct.status === "OK") {
             const data = FetchProduct.data;
+            console.log(data);
             setProduct({
                 id: data.id,
                 name: data.name,
                 description: data.description,
+                tech_features: data.tech_features,
                 price: data.price,
                 image_url: data.image_url,
                 categories: data.categories || [],
-                price_year: data.price_year || null
+                price_year: data.price_year || null,
             });
             setSuggestions(data.suggestions || []);
         } else {
             setError("Error fetching product");
         }
     };
+    
 
     useEffect(() => {
         const productId = parseInt(Array.isArray(id_product) ? id_product[0] : id_product, 10);
@@ -83,7 +88,6 @@ export default function Product() {
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
-
                 <Text style={styles.title}>{product.name}</Text>
                 <View style={styles.detailsContainer}>
                     <View style={styles.detailsContainerText}>
@@ -113,7 +117,7 @@ export default function Product() {
                     <View style={styles.detailsContainerText}>
                         <Text style={styles.h2Title}>Caractéristiques techniques</Text>
                         <Text style={[styles.description, styles.descriptionRight]}>
-                            {product.description || "No description available."}
+                            {product.tech_features || "No features available."}
                         </Text>
                     </View>
                 </View>
@@ -166,6 +170,16 @@ export default function Product() {
 
 const screenWidth = Dimensions.get("window").width; 
 const styles = StyleSheet.create({
+    availabilityContainer: {
+        alignItems: "center",
+        marginVertical: 10,
+    },
+    availability: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#d9534f",
+    },
+    
     body: {
         flex: 1,
         backgroundColor: "#F2F2F2",
