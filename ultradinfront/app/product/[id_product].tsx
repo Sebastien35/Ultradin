@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Text, View, StyleSheet, Image, ScrollView, Button, Alert } from "react-native";
-import { useLocalSearchParams } from "expo-router";
-import { GetProducts } from "@/scripts/GetProducts";
+import { useLocalSearchParams } from "expo-router"; // Assuming you have a function to fetch suggestions
 import { Dimensions } from "react-native";
 import Navbar from "@/components/ui/navbar";
 import Loader from "@/components/ui/loader";
+import productService from "../services/product.service";
 
 export default function Product() {
     const { id_product } = useLocalSearchParams();
@@ -27,7 +27,6 @@ export default function Product() {
         categories: [],
         price_year: null,
     });
-    
 
     const [suggestions, setSuggestions] = useState<{
         id: number;
@@ -38,31 +37,37 @@ export default function Product() {
     const [error, setError] = useState("");
 
     const fetchProduct = async (id: number) => {
-        const FetchProduct = await GetProducts(id);
+        const FetchProduct = await productService.getProducts(id);
         if (FetchProduct.status === "OK") {
-            const data = FetchProduct.data;
-            console.log(data);
+            const productData = FetchProduct.data;
             setProduct({
-                id: data.id,
-                name: data.name,
-                description: data.description,
-                tech_features: data.tech_features,
-                price: data.price,
-                image_url: data.image_url,
-                categories: data.categories || [],
-                price_year: data.price_year || null,
+                id: productData.id_product,
+                name: productData.name,
+                description: productData.description,
+                tech_features: productData.technical_features,
+                price: productData.price,
+                image_url: productData.image_url,
+                categories: productData.category.flat(),
+                price_year: productData.price_year,
             });
-            setSuggestions(data.suggestions || []);
         } else {
-            setError("Error fetching product");
+            setError(FetchProduct.data || "Error fetching product");
         }
     };
-    
+
+    const fetchSuggestions = async (id: number) => {
+        const FetchSuggestions = await productService.getProductSuggestions(id);
+        if (FetchSuggestions.status === "OK") {
+            setSuggestions(FetchSuggestions.data || []);
+        } else {
+            setError("Error fetching suggestions");
+        }
+    };
 
     useEffect(() => {
         const productId = parseInt(Array.isArray(id_product) ? id_product[0] : id_product, 10);
         if (!isNaN(productId)) {
-            fetchProduct(productId);
+            fetchProduct(productId).then(() => fetchSuggestions(productId));
         } else {
             setError("Invalid product ID");
         }
@@ -166,7 +171,6 @@ export default function Product() {
         </ScrollView>
     );
 }
-
 
 const screenWidth = Dimensions.get("window").width; 
 const styles = StyleSheet.create({

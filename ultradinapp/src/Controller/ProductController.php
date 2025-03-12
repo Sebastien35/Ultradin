@@ -97,7 +97,11 @@ class ProductController extends AbstractController
         switch ($method) {
             case 'GET':
                 $product = $productRepository->find($id);
-                $response = new JsonResponse($product, 200, ['Content-Type' => 'application/json']);
+                if(!$product){
+                    return new JsonResponse(['error' => 'Product not found'], 404);
+                }
+                $json = $serializer->serialize($product, 'json', ['groups' => 'product:read']);
+                $response = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
                 $response->setPublic();
                 $response->setMaxAge(3600);
                 $response->setSharedMaxAge(3600);
@@ -123,7 +127,7 @@ class ProductController extends AbstractController
         if(!$product){
             return new JsonResponse(['error' => 'Product not found'], 404);
         }
-        $products = $productRepository->getSuggestionsV2($product);
+        $products = $productRepository->getSuggestionsV2($product, 5);
         $json = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
         $response = new JsonResponse($json, 200, ['Content-Type' => 'application/json']);
         $response->setPublic();
