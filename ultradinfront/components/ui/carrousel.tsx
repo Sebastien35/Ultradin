@@ -25,7 +25,7 @@ export default function ProductCarousel() {
         const fetchProducts = async () => {
             const FetchProducts = await GetProducts();
             if (FetchProducts.status === "OK") {
-                setProducts(FetchProducts.data);
+                setProducts(FetchProducts.data.top_sales);
             } else {
                 setError("Error fetching products");
                 console.error(FetchProducts.data);
