@@ -19,9 +19,12 @@ services:
             - '../src/Kernel.php'
     App\Command\FetchExchangeRatesCommand:
         tags: ['console.command']
+    Prometheus\Storage\InMemory: ~
+    Prometheus\CollectorRegistry:
+        arguments: ['@Prometheus\Storage\InMemory']
+        shared: true
     App\Middleware\PrometheusMiddleware:
-        arguments: []
-        tags:
-            - { name: kernel.event_subscriber }
+        arguments: ['@Prometheus\CollectorRegistry']
+        tags: ['kernel.event_subscriber']
 
 

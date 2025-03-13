@@ -1,40 +1,19 @@
+# Start from the PHP image
 FROM php:8.2-fpm
 
-RUN apt update && apt install -y \
-    nano \
-    libpng-dev \
-    libjpeg-dev \
-    libzip-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxslt1-dev \
-    unzip \
-    build-essential \
-    git \
-    nginx \
+# Install Redis extension
+RUN apt-get update && apt-get install -y \
     libssl-dev \
-    default-mysql-client \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-enable opcache \
-    && docker-php-ext-install xsl \
-    && docker-php-ext-install zip \
-    && docker-php-ext-install intl \
-    && docker-php-ext-install soap \
-    && pecl install mongodb \
-    && docker-php-ext-enable mongodb
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
-RUN docker-php-ext-install  pdo_mysql \
-    && docker-php-ext-enable pdo_mysql
+# Install other PHP extensions (if needed)
+RUN docker-php-ext-install pdo pdo_mysql
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-
-COPY . .
-
-ENV COMPOSER_ALLOW_SUPERUSER 1
-
-RUN composer install
+# Copy the Symfony application into the container
+COPY . /var/www/html
 
 EXPOSE 9000
+
+# Start PHP-FPM
 CMD ["php-fpm"]
