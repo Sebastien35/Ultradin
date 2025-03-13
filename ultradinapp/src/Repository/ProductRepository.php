@@ -223,6 +223,7 @@ class ProductRepository extends ServiceEntityRepository
             'price' => $product->getPrice(),
             'price_year' => $product->getPriceYear(),
             'image_url' => $product->getImageUrl(),
+            'availability' => $product->isAvailable(),
             'categories' => array_map(fn($category) => $category->getName(), $product->getCategory()->toArray()),
             'suggestions' => $arraySuggestions
         ];

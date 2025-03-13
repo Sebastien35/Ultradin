@@ -17,6 +17,7 @@ export default function Product() {
         image_url: string;
         categories: Array<string>;
         price_year: number | null;
+        availability: null;
     }>({
         id: null,
         name: "",
@@ -26,6 +27,7 @@ export default function Product() {
         image_url: "",
         categories: [],
         price_year: null,
+        availability: null,
     });
     
 
@@ -51,6 +53,7 @@ export default function Product() {
                 image_url: data.image_url,
                 categories: data.categories || [],
                 price_year: data.price_year || null,
+                availability: data.availability || null,
             });
             setSuggestions(data.suggestions || []);
         } else {
@@ -88,6 +91,11 @@ export default function Product() {
         <ScrollView style={styles.body}>
             <Navbar />
             <View style={styles.productContainer}>
+            <View style={styles.availabilityContainer}>
+                <Text style={styles.availability}>
+                    {product.availability ? "Available" : "Not Available"}
+                </Text>
+            </View>
                 <Text style={styles.title}>{product.name}</Text>
                 <View style={styles.detailsContainer}>
                     <View style={styles.detailsContainerText}>
