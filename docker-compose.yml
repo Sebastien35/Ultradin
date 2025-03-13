@@ -1,5 +1,14 @@
 version: '3.8'
 services:
+  app:
+    build: 
+      context: ./ultradinapp/
+      dockerfile: Dockerfile
+    container_name: app
+    restart: always
+    ports:
+      - "8000:80"
+
   database:
     image: mariadb:10.5
     container_name: database
