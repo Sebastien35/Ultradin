@@ -10,6 +10,11 @@ use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Order;
+use App\Cron\Sales\GenerateSalesReport;
+use App\Repository\OrderRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use DateTime;
+use DateInterval;
 
 class TestController extends AbstractController
 {
@@ -89,5 +94,21 @@ class TestController extends AbstractController
         return new Response('Error generating PDF: '.$e->getMessage());
     }
         return new Response('Order created successfully');
+    }
+
+    #[Route('/test-sales-report', name: 'app_test_sales_report')]
+    public function testSalesReport(OrderRepository $orderRepo, ProductRepository $pr): Response{
+        try{
+            $manager = new ManagerRegistry();
+            $orderRepository = new OrderRepository($manager);
+            $date = new DateTime();
+            $oneWeekAgo = $date->sub(new DateInterval('P7D'));
+            $orders = $orderRepository->getOrdersToGenerateSalesReport($oneWeekAgo, new DateTime());
+            $topsellers = $pr->getTopSales();
+
+           
+        } catch (\Exception $e) {
+            return new Response('Error generating sales report: '.$e->getMessage());
+        }
     }
 }
