@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
+use App\Entity\User;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\env;
 
 require_once dirname(__DIR__, 2) . '/config/Globals.php';
 
@@ -95,5 +98,100 @@ class CommonController
 
         return $filePath;
     }
+
+
+    public static function sendEmailBrevo($to, $subject, $message){
+        $apiKey = CommonController::getBrevoApiKey();
+        $url = 'https://api.brevo.com/v3/smtp/email';
+    
+        $data = [
+            'sender' => ['name' => COMPANY_NAME, 'email' => COMPANY_EMAIL],
+            'to' => [['email' => $to]],
+            'subject' => $subject,
+            'htmlContent' => $message
+        ];
+    
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'accept: application/json',
+            'content-type: application/json',
+            'api-key: ' . $apiKey
+        ]);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+        $response = curl_exec($ch);
+        curl_close($ch);
+    
+        return json_decode($response, true);
+    }
+
+    public static function sendEmailVerificationEmail(User $user, $verificationCode){
+        $email = $user->getEmail();
+        $html = "";
+        $html .= CommonController::getHeaderMail();
+        $html .= file_get_contents(dirname(__DIR__, 2) . '/config/mails/email_verification_email.html');
+        $html .= CommonController::getFooterMail();
+        $arrayFind = array(
+            '[#COMPANY_NAME#]',
+            '[#COMPANY_ADDRESS#]',
+            '[#COMPANY_EMAIL#]',
+            '[#COMPANY_PHONE#]',
+            '[#WEBSITE_URL#]',
+            '[#VERIFICATION_CODE#]',
+        );
+        $arrayReplace = array(
+            COMPANY_NAME,
+            COMPANY_ADDRESS,
+            COMPANY_EMAIL,
+            COMPANY_PHONE,
+            WEBSITE_URL,
+            $verificationCode,
+        );
+        $html = str_replace($arrayFind, $arrayReplace, $html);
+        CommonController::sendEmailBrevo($email, 'Email Verification', $html);
+    }
+    
+
+
+    public static function getBrevoApiKey(){
+        return $_ENV['APP_ENV'] === 'prod' ? $_ENV['PROD_BREVO_API_KEY'] : $_ENV['STAGING_BREVO_API_KEY'];
+    }
+    
+
+    public static function getHeaderMail(){
+        return file_get_contents(dirname(__DIR__, 2) . '/config/mails/header_mail.html');
+    }
+
+    public static function getFooterMail(){
+        return file_get_contents(dirname(__DIR__, 2) . '/config/mails/footer_mail.html');
+    }
+
+    public static function sendWelcomeEmail(User $user ){
+        $email = $user->getEmail();
+        $html = "";
+        $html .= CommonController::getHeaderMail();
+        $html .= file_get_contents(dirname(__DIR__, 2) . '/config/mails/welcome_mail.html');
+        $html .= CommonController::getFooterMail();
+        $arrayFind = array(
+            '[#COMPANY_NAME#]',
+            '[#COMPANY_ADDRESS#]',
+            '[#COMPANY_EMAIL#]',
+            '[#COMPANY_PHONE#]',
+            '[#WEBSITE_URL#]',
+        );
+        $arrayReplace = array(
+            COMPANY_NAME,
+            COMPANY_ADDRESS,
+            COMPANY_EMAIL,
+            COMPANY_PHONE,
+            WEBSITE_URL,
+        );
+        $html = str_replace($arrayFind, $arrayReplace, $html);
+        return CommonController::sendEmailBrevo($email, 'Welcome to ' . COMPANY_NAME, $html);
+
+    }
+    
 
 }

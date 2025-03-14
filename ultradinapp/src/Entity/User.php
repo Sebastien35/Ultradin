@@ -87,10 +87,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Cart $cart = null;
 
+    /**
+     * @var Collection<int, UsersVerifications>
+     */
+    #[ORM\OneToMany(targetEntity: UsersVerifications::class, mappedBy: 'user_id', orphanRemoval: true)]
+    private Collection $usersVerifications;
+
     public function __construct()
     {
         $this->invoices = new ArrayCollection();
         $this->orders = new ArrayCollection();
+        $this->usersVerifications = new ArrayCollection();
     }
 
 
@@ -258,6 +265,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->cart = $cart;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UsersVerifications>
+     */
+    public function getUsersVerifications(): Collection
+    {
+        return $this->usersVerifications;
+    }
+
+    public function addUsersVerification(UsersVerifications $usersVerification): static
+    {
+        if (!$this->usersVerifications->contains($usersVerification)) {
+            $this->usersVerifications->add($usersVerification);
+            $usersVerification->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsersVerification(UsersVerifications $usersVerification): static
+    {
+        if ($this->usersVerifications->removeElement($usersVerification)) {
+            // set the owning side to null (unless already changed)
+            if ($usersVerification->getUserId() === $this) {
+                $usersVerification->setUserId(null);
+            }
+        }
 
         return $this;
     }
