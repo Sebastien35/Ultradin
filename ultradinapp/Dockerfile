@@ -1,27 +1,41 @@
+# Use official PHP image with Apache
 FROM php:8.2-apache
 
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git unzip libpq-dev libonig-dev libzip-dev libxml2-dev libcurl4-openssl-dev \
+    && docker-php-ext-install pdo pdo_mysql zip opcache \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update \
-    && apt-get install -qq -y --no-install-recommends \
-    cron \
-    vim \
-    locales coreutils apt-utils git libicu-dev g++ libpng-dev libxml2-dev libzip-dev libonig-dev libxslt-dev;
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && \
-    echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen && \
-    locale-gen
+# Set working directory
+WORKDIR /var/www/html
 
-RUN curl -sSk https://getcomposer.org/installer | php -- --disable-tls && \
-    mv composer.phar /usr/local/bin/composer
+# Copy application files
+COPY . .
 
-RUN docker-php-ext-configure intl
-RUN docker-php-ext-install pdo pdo_mysql mysqli gd opcache intl zip calendar dom mbstring zip gd xsl && a2enmod rewrite
-RUN pecl install apcu && docker-php-ext-enable apcu
+# Install dependencies
+RUN composer install --optimize-autoloader 
 
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
+# Set up proper permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 777 /var/www/html/var /var/www/html/public /var/www/html/config
 
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions amqp
+# Copy Apache virtual host configuration
+COPY ./vhosts/vhosts.conf /etc/apache2/sites-available/000-default.conf
 
-WORKDIR /var/www
+# Enable the new site configuration
+RUN a2ensite 000-default.conf
+RUN a2enmod rewrite
+
+# Expose the port used by Apache
+EXPOSE 80
+
+# Clear Symfony cache
+RUN php bin/console cache:clear
+
+# Start Apache
+CMD ["apache2-foreground"]
