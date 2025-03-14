@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -88,16 +89,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Cart $cart = null;
 
     /**
-     * @var Collection<int, Purchase>
+     * @var Collection<int, UsersVerifications>
      */
-    #[ORM\OneToMany(targetEntity: Purchase::class, mappedBy: 'User')]
-    private Collection $purchases;
+    #[ORM\OneToMany(targetEntity: UsersVerifications::class, mappedBy: 'user_id', orphanRemoval: true)]
+    private Collection $usersVerifications;
 
     public function __construct()
     {
         $this->invoices = new ArrayCollection();
         $this->orders = new ArrayCollection();
-        $this->purchases = new ArrayCollection();
+        $this->usersVerifications = new ArrayCollection();
     }
 
 
@@ -270,34 +271,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Purchase>
+     * @return Collection<int, UsersVerifications>
      */
-    public function getPurchases(): Collection
+    public function getUsersVerifications(): Collection
     {
-        return $this->purchases;
+        return $this->usersVerifications;
     }
 
-    public function addPurchase(Purchase $purchase): static
+    public function addUsersVerification(UsersVerifications $usersVerification): static
     {
-        if (!$this->purchases->contains($purchase)) {
-            $this->purchases->add($purchase);
-            $purchase->setUser($this);
+        if (!$this->usersVerifications->contains($usersVerification)) {
+            $this->usersVerifications->add($usersVerification);
+            $usersVerification->setUserId($this);
         }
 
         return $this;
     }
 
-    public function removePurchase(Purchase $purchase): static
+    public function removeUsersVerification(UsersVerifications $usersVerification): static
     {
-        if ($this->purchases->removeElement($purchase)) {
+        if ($this->usersVerifications->removeElement($usersVerification)) {
             // set the owning side to null (unless already changed)
-            if ($purchase->getUser() === $this) {
-                $purchase->setUser(null);
+            if ($usersVerification->getUserId() === $this) {
+                $usersVerification->setUserId(null);
             }
         }
 
         return $this;
     }
+
 
     
 }

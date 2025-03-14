@@ -16,14 +16,15 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-    public function getOrdersToGenerateSalesReport($dateStart, $dateFin){
+    public function getOrdersToGenerateSalesReport($dateStart, $dateFin) {
         $qb = $this->createQueryBuilder('o')
-            ->where('o.createdAt BETWEEN :dateStart AND :dateFin AND o.status != "pending"')
+            ->where('o.date_confirmed BETWEEN :dateStart AND :dateFin AND o.status != :status')
             ->setParameter('dateStart', $dateStart)
             ->setParameter('dateFin', $dateFin)
+            ->setParameter('status', 'pending')
             ->getQuery()
             ->getResult();
+    
         return $qb;
-
     }
 }
