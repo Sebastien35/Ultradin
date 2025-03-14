@@ -1,13 +1,16 @@
 version: '3.8'
 services:
-  app:
-    build: 
-      context: ./ultradinapp/
-      dockerfile: Dockerfile
-    container_name: app
-    restart: always
-    ports:
-      - "8000:80"
+  # app:
+  #   build: 
+  #     context: ./ultradinapp/
+  #     dockerfile: Dockerfile
+  #   container_name: app
+  #   restart: always
+  #   ports:
+  #     - "8000:80"
+  #   environment:
+  #     DATABASE_URL: mysql://user:password@database:3306/ultradindb
+  #     REDIS_URL: redis://redis:6379
 
   database:
     image: mariadb:10.5
