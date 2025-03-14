@@ -7,6 +7,7 @@ framework:
     session: true
     http_cache: true
 
+
     #esi: true
     #fragments: true
 
