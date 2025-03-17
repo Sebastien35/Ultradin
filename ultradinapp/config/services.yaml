@@ -8,8 +8,8 @@ parameters:
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true     
+        autoconfigure: true 
 
     App\:
         resource: '../src/'
@@ -23,8 +23,6 @@ services:
     Prometheus\CollectorRegistry:
         arguments: ['@Prometheus\Storage\InMemory']
         shared: true
-    App\Middleware\PrometheusMiddleware:
-        arguments: ['@Prometheus\CollectorRegistry']
-        tags: ['kernel.event_subscriber']
+
 
 
