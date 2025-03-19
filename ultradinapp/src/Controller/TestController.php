@@ -10,97 +10,40 @@ use App\Repository\ProductRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Order;
-use App\Repository\UsersVerificationsRepository;
+use App\Cron\Sales\GenerateSalesReport;
+use App\Entity\User;
+use App\Repository\AdminFileRepository;
+use App\Repository\OrderRepository;
+use Doctrine\Persistence\ManagerRegistry;
+use DateTime;
+use DateInterval;
+
+use App\Services\AzureBlobService;
 
 class TestController extends AbstractController
 {
-    #[Route('/test-pdf', name: 'app_test')]
-    public function tryPDF(UserRepository $userRepo, EntityManagerInterface $em): Response
-    {
+    
+
+    #[Route('/test-sales-report', name: 'app_test_sales_report')]
+    public function testSalesReport(OrderRepository $orderRepo, ProductRepository $pr, UserRepository $userRepo, AzureBlobService $azureBlob, AdminFileRepository $adminFileRepo): Response{
         try{
-            $data = [
-                'products' => [
-                    ['name' => 'Product 1', 'price' => 100],
-                    ['name' => 'Product 2', 'price' => 200],
-                    ['name' => 'Product 3', 'price' => 300],
-                ],
-                'user' => ['email' => 'user@email.com'],
-                'total' => 600,
-            ];
-            $filepath = CommonController::generateInvoicePdf($data);
-            $invoice = new Invoice();
-            $invoice->setFileUrl($filepath);
-            $invoice->setCreatedAt(new \DateTimeImmutable());
-            $user = $userRepo->findOneBy(['email' => $data['user']['email']]);
-            $invoice->setUser($user);
-            $em->persist($invoice);
-            $em->flush();
 
-            return new Response('PDF generated successfully at: '.$filepath);
-
-        } catch (\Exception $e) {
-            return new Response('Error generating PDF: '.$e->getMessage());
-        }
-    }
-
-    #[Route('/test-new-order', name: 'app_test_new_order')]
-    public function testOrder(ProductRepository $productRepo, EntityManagerInterface $em): Response{
-        try{
-        $order = new Order();
-        $order->setDateConfirmed(new \DateTimeImmutable());
-        $order->setOrderUuid(uniqid());
-        $order->setStatus('confirmed');
-        $order->setEta(new \DateTimeImmutable());
-        $order->setUser($this->getUser());
-        $order->addProduct($productRepo->find(1));
-        $order->addProduct($productRepo->find(2));
-        $order->addProduct($productRepo->find(3));
-        $price = 0;
-        foreach ($order->getProducts() as $product) {
-            $price += $product->getPrice();
-        }
-        $order->setTotalPrice($price);
+            $date = new DateTime();
+            $oneWeekAgo = $date->sub(new DateInterval('P7D'));
+            $orders = $orderRepo->getOrdersToGenerateSalesReport($oneWeekAgo, new DateTime());
+            $topsellers = $pr->getTopSales();
+            $arrayData = ['orders' => $orders, 'topSellers' => $topsellers, 'startDate' => $oneWeekAgo, 'endDate' => new DateTime()];
         
-        $em->persist($order);
-        $em->flush();
+            $fileUrl = CommonController::generateSalesReportPdf($arrayData, true, $userRepo, $azureBlob, $adminFileRepo);
+
+           return new Response('Sales report generated successfully');
         } catch (\Exception $e) {
-            return new Response('Error creating order: '.$e->getMessage());
+            return new Response('Error generating sales report: '.$e->getMessage());
         }
-        try{
-        $data = [
-            'products' => array_map(function($product){
-                return ['name' => $product->getName(), 'price' => $product->getPrice()];
-            }, $order->getProducts()->toArray()),
-            'user' => ['email' => $order->getUser()->getEmail()],
-            'total' => $price,
-        ];
-    } catch (\Exception $e) {
-        return new Response('Error creating invoice data: '.$e->getMessage());
-    }
-    try{
-        $filepath = CommonController::generateInvoicePdf($data);
-        $invoice = new Invoice();
-        $invoice->setFileUrl($filepath);
-        $invoice->setCreatedAt(new \DateTimeImmutable());
-        $invoice->setUser($order->getUser());
-        $em->persist($invoice);
-        $em->flush();
-        return new Response('Order created successfully');  
-    } catch (\Exception $e) {
-        return new Response('Error generating PDF: '.$e->getMessage());
-    }
-        return new Response('Order created successfully');
     }
 
-    #[Route('/test-mail', name: 'app_test_mail')]
-    public function mailTesting(UserRepository $userRepo, UsersVerificationsRepository $uvr){
-        $user = $userRepo->findOneBy(['email' => 'Sborgne@live.fr']);
-        if(!$user){
-            return new Response('User not found');
-        }
-        $uvr->createEmailVerification($user);
-        return new Response('Email verification created');
+    
 
-        
-    }
+    
+    
 }

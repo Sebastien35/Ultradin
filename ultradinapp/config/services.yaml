@@ -23,6 +23,13 @@ services:
     Prometheus\CollectorRegistry:
         arguments: ['@Prometheus\Storage\InMemory']
         shared: true
+    App\Middleware\PrometheusMiddleware:
+        arguments: ['@Prometheus\CollectorRegistry']
+        tags: ['kernel.event_subscriber']
+    App\Services\AzureBlobService:
+       autowire: true
+       arguments:
+            $connectionString: '%env(AZURE_STORAGE_CONNECTION_STRING)%'
 
 
 
