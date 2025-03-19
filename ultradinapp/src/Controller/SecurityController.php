@@ -21,7 +21,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use App\Service\EncryptionService;
 
 class SecurityController extends AbstractController
-{   
+{
 
     private UserPasswordHasherInterface $passwordHasher;
     private JWTTokenManagerInterface $jwtManager;
@@ -53,7 +53,6 @@ class SecurityController extends AbstractController
             return new JsonResponse(['error' => 'Invalid login credentials.'], JsonResponse::HTTP_UNAUTHORIZED);
         }
         $token = $this->jwtManager->create($user);
-        error_log($token);  
         return new JsonResponse(['token' => $token]);
     }
 
@@ -85,7 +84,6 @@ class SecurityController extends AbstractController
         $user->setPassword($hashedPassword);
         $user->setDefaultPaymentMethod($data['default_payment_method']);
 
-        // Save user to the database
         $entityManager->persist($user);
         $entityManager->flush();
 
@@ -106,5 +104,7 @@ class SecurityController extends AbstractController
         $newJwt = $this->jwtManager->create($user);
         return new JsonResponse(['token' => $newJwt]);
     }
+
+    
 
 }

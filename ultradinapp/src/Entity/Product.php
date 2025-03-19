@@ -15,47 +15,64 @@ class Product
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: "id_product", type: "integer")]
+    #[Groups(['product:read'])]
     private ?int $id_product = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(length: 320)]
     private ?string $image_url = null;
 
-    #[ORM\Column]
-    private ?int $stock = null;
-
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $date_created = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $technical_features = null;
 
+
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?bool $availability = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column]
     private ?float $price = null;
 
+    #[Groups(['product:read'])]
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $date_updated = null;
 
-    
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinTable(name: 'product_category')]
     #[ORM\JoinColumn(name: 'id_product', referencedColumnName: 'id_product')]
     #[ORM\InverseJoinColumn(name: 'id_category', referencedColumnName: 'id_category')]
     #[MaxDepth(1)]
+    #[Groups(['product:read'])]
     private Collection $category;
+
+    #[Groups(['product:read'])]
+    #[ORM\Column]
+    private ?float $price_year = null;
+
+    #[ORM\Column]
+    private ?int $weekly_sales = null;
 
     public function __construct()
     {
         $this->category = new ArrayCollection();
     }
+
+    #[ORM\ManyToMany(targetEntity: Order::class, mappedBy: "products")]
+    private Collection $orders;
 
     public function getIdProduct(): ?int
     {
@@ -94,18 +111,6 @@ class Product
     public function setImageUrl(string $image_url): static
     {
         $this->image_url = $image_url;
-
-        return $this;
-    }
-
-    public function getStock(): ?int
-    {
-        return $this->stock;
-    }
-
-    public function setStock(int $stock): static
-    {
-        $this->stock = $stock;
 
         return $this;
     }
@@ -193,4 +198,30 @@ class Product
 
         return $this;
     }
+
+    public function getPriceYear(): ?float
+    {
+        return $this->price_year;
+    }
+
+    public function setPriceYear(float $price_year): static
+    {
+        $this->price_year = $price_year;
+
+        return $this;
+    }
+
+    public function getWeeklySales(): ?int
+    {
+        return $this->weekly_sales;
+    }
+
+    public function setWeeklySales(int $weekly_sales): static
+    {
+        $this->weekly_sales = $weekly_sales;
+
+        return $this;
+    }
+
+    
 }

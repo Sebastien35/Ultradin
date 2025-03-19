@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -14,7 +15,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private int $id_user;
 
     #[ORM\Column(length: 180)]
@@ -64,6 +65,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'integer', nullable:true)]
     private ?int $default_payment_method;
+
+
+    #[ORM\OneToOne(targetEntity: UserAddress::class, mappedBy: 'user', orphanRemoval: true)]
+    private ?UserAddress $user_address = null;
+
+    /**
+     * @var Collection<int, Invoice>
+     */
+    #[ORM\OneToMany(targetEntity: Invoice::class, mappedBy: 'user')]
+    private Collection $invoices;
+
+    /**
+     * @var Collection<int, Order>
+     */
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'user')]
+    private Collection $orders;
+
+
+    #[ORM\OneToOne(targetEntity: Cart::class, mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Cart $cart = null;
+
+    /**
+     * @var Collection<int, UsersVerifications>
+     */
+    #[ORM\OneToMany(targetEntity: UsersVerifications::class, mappedBy: 'user_id', orphanRemoval: true)]
+    private Collection $usersVerifications;
+
+    public function __construct()
+    {
+        $this->invoices = new ArrayCollection();
+        $this->orders = new ArrayCollection();
+        $this->usersVerifications = new ArrayCollection();
+    }
+
 
     public function getDefaultPaymentMethod(): int
     {
@@ -150,4 +185,119 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    public function getAddress(): ?UserAddress
+    {
+        return $this->user_address;
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function getInvoices(): Collection
+    {
+        return $this->invoices;
+    }
+
+    public function addInvoice(Invoice $invoice): static
+    {
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvoice(Invoice $invoice): static
+    {
+        if ($this->invoices->removeElement($invoice)) {
+            // set the owning side to null (unless already changed)
+            if ($invoice->getUser() === $this) {
+                $invoice->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            // set the owning side to null (unless already changed)
+            if ($order->getUser() === $this) {
+                $order->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCart(): ?Cart
+    {
+        return $this->cart;
+    }
+
+    public function setCart(Cart $cart): static
+    {
+        // set the owning side of the relation if necessary
+        if ($cart->getUser() !== $this) {
+            $cart->setUser($this);
+        }
+
+        $this->cart = $cart;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, UsersVerifications>
+     */
+    public function getUsersVerifications(): Collection
+    {
+        return $this->usersVerifications;
+    }
+
+    public function addUsersVerification(UsersVerifications $usersVerification): static
+    {
+        if (!$this->usersVerifications->contains($usersVerification)) {
+            $this->usersVerifications->add($usersVerification);
+            $usersVerification->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsersVerification(UsersVerifications $usersVerification): static
+    {
+        if ($this->usersVerifications->removeElement($usersVerification)) {
+            // set the owning side to null (unless already changed)
+            if ($usersVerification->getUserId() === $this) {
+                $usersVerification->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+    
 }

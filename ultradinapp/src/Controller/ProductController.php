@@ -16,8 +16,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Entity\Category;
 use App\Repository\CategoryRepository;
-
-
+use OpenApi\Serializer;
 
 #[Route('/products', name: 'app_products_')]
 class ProductController extends AbstractController
@@ -36,35 +35,46 @@ class ProductController extends AbstractController
             return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
         }
         try{
-        $product = new Product();
-        $product->setName($data['name']);
-        $product->setDescription($data['description'] ?? null);
-        $product->setImageUrl($data['image_url'] ?? null);
-        $product->setPrice($data['price']);
-        $product->setDateCreated(new \DateTime());
-        $product->setStock($data['stock']);
-        $product->setAvailability($data['availability']);
-        $product->setTechnicalFeatures($data['tech_features'] ?? '');
-        $this->entityManager->persist($product);
-        $this->entityManager->flush();
-        return $this->json([
-            'message' => 'Product created successfully',
-            'id' => $product->getIdProduct(),
-        ], Response::HTTP_CREATED);
+            $product = new Product();
+            $product->setName($data['name']);
+            $product->setDescription($data['description'] ?? null);
+            $product->setImageUrl($data['image_url'] ?? null);
+            $product->setPrice($data['price']);
+            $product->setDateCreated(new \DateTime());
+            $product->setAvailability($data['availability']);
+            $product->setTechnicalFeatures($data['tech_features'] ?? '');
+            $this->entityManager->persist($product);
+            $this->entityManager->flush();
+            return $this->json([
+                'message' => 'Product created successfully',
+                'id' => $product->getIdProduct(),
+            ], Response::HTTP_CREATED);
         } catch (Exception $e){
             return $e->getMessage();
         }
     }
 
     #[Route('/all', name: 'all', methods: ['GET'])]
-    public function getAllProducts(SerializerInterface $serializer): JsonResponse
+    public function getAllProducts(SerializerInterface $serializer, ProductRepository $pr): JsonResponse
     {
-        $products = $this->entityManager->getRepository(Product::class)->findAll();
+        $products = $pr->findAll();
+        $topSales = $pr->getTopSales();
+
         if (!$products) {
             return new JsonResponse(['error' => 'No products found'], 404);
         }
-        $jsonProducts = $serializer->serialize($products, 'json');
-        return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+        $responseData = [
+            'products' => $products,
+            'top_sales' => $topSales
+        ];
+        $json = $serializer->serialize($responseData, 'json', ['groups' => 'product:read']);
+        $reponse = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
+        
+        $reponse->setPublic();
+        $reponse->setMaxAge(3600);
+        $reponse->setSharedMaxAge(3600);
+        return $reponse;
+
     }
 
 
@@ -86,8 +96,16 @@ class ProductController extends AbstractController
         }
         switch ($method) {
             case 'GET':
-                $jsonProduct = $serializer->serialize($product, 'json');
-                return new JsonResponse(json_decode($jsonProduct), 200, ['Content-Type' => 'application/json']);
+                $product = $productRepository->find($id);
+                if(!$product){
+                    return new JsonResponse(['error' => 'Product not found'], 404);
+                }
+                $json = $serializer->serialize($product, 'json', ['groups' => 'product:read']);
+                $response = new JsonResponse(json_decode($json), 200, ['Content-Type' => 'application/json']);
+                $response->setPublic();
+                $response->setMaxAge(3600);
+                $response->setSharedMaxAge(3600);
+                return $response;
             case 'DELETE':
                 return $productRepository->deleteProduct($product);
             case 'PUT':
@@ -96,6 +114,26 @@ class ProductController extends AbstractController
             default:
                 return new JsonResponse(['error' => 'Method not allowed'], 405);
         }
+    }
+
+    #[Route('/{id}/suggestions', name: 'suggestions', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function getProductSuggestions(
+        int $id,
+        SerializerInterface $serializer,
+        ProductRepository $productRepository
+    ): Response {
+        $product = $this->entityManager->getRepository(Product::class)->find($id);
+
+        if(!$product){
+            return new JsonResponse(['error' => 'Product not found'], 404);
+        }
+        $products = $productRepository->getSuggestionsV2($product, 5);
+        $json = $serializer->serialize($products, 'json', ['groups' => 'product:read']);
+        $response = new JsonResponse($json, 200, ['Content-Type' => 'application/json']);
+        $response->setPublic();
+        $response->setMaxAge(3600);
+
+        return $response;
     }
 
     #[Route('/search', name: 'search', methods: ['GET'])]
@@ -113,6 +151,50 @@ class ProductController extends AbstractController
         }
         $jsonProducts = $serializer->serialize($products, 'json');
         return new JsonResponse(json_decode($jsonProducts), 200, ['Content-Type' => 'application/json']);
+    }
+
+
+    /**
+     * @Route("/search", name="search", methods={"POST"})
+     * @param HttpFoundationRequest $request
+     * @param SerializerInterface $serialzer
+     * @param ProductRepository $productRepository
+     * @return Response
+     * 
+     * Prend une liste de paramètres dans le corps de la requête POST et les utilise pour récupérer les produits 
+     * correspondants dans la base de données
+     */
+    #[Route('/search', name: 'search', methods : ['POST'])]
+    public function searchPost(HttpFoundationRequest $request, SerializerInterface $serialzer, ProductRepository $productRepository): Response{
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+            return $this->json(['error' => 'Invalid JSON'], Response::HTTP_BAD_REQUEST);
+        }
+        $categories = isset($data['categories']) ? $data['categories'] : [];
+        $minPrice   = isset($data['min_price']) ? $data['min_price'] : null;
+        $maxPrice   = isset($data['max_price']) ? $data['max_price'] : null;
+
+
+        $products = $productRepository->findByCategoryId($categories, $minPrice, $maxPrice);
+        if (!$products) {
+            return new JsonResponse(['error' => 'No products found'], 404);
+        }
+        $returnProducts = [];
+        foreach($products as $product){
+            $productData = array(
+                'id' => $product->getIdProduct(),
+                'name' => $product->getName(),
+                'category' => $product->getCategory(),
+                'description' => $product->getDescription(),
+                'tech_features' => $product->getTechnicalFeatures(),
+                'price_month' => $product->getPrice(),
+                'price_year' => $product->getPriceYear(),
+                'availability' => $product->getAvailability(),
+            );
+            $returnProducts[] = $productData;
+        }
+        return new JsonResponse($returnProducts, 200, ['Content-Type' => 'application/json']);
+
     }
 
 

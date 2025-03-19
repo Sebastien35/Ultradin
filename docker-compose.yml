@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  # app:
+  #   build: 
+  #     context: ./ultradinapp/
+  #     dockerfile: Dockerfile
+  #   container_name: app
+  #   restart: always
+  #   ports:
+  #     - "8000:80"
+  #   environment:
+  #     DATABASE_URL: mysql://user:password@database:3306/ultradindb
+  #     REDIS_URL: redis://redis:6379
+
   database:
     image: mariadb:10.5
     container_name: database
@@ -11,4 +23,32 @@ services:
       MYSQL_PASSWORD: password
     ports:
       - "8082:3306"
-      
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+    ports:
+      - "8307:80"
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "2200:3000"
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090" 
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+volumes:
+  db_data:

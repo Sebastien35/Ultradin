@@ -1,4 +1,17 @@
 {
+    "artprima/prometheus-metrics-bundle": {
+        "version": "1.19",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.14",
+            "ref": "9522bce04594caddf6c61ec78c88fea5f5ffa121"
+        },
+        "files": [
+            "./config/packages/prometheus_metrics.yaml",
+            "./config/routes/metrics.yaml"
+        ]
+    },
     "doctrine/doctrine-bundle": {
         "version": "2.13",
         "recipe": {
@@ -38,6 +51,18 @@
             "./migrations/.gitignore"
         ]
     },
+    "knplabs/knp-snappy-bundle": {
+        "version": "1.10",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.5",
+            "ref": "c81bdcf4a9d4e7b1959071457f9608631865d381"
+        },
+        "files": [
+            "./config/packages/knp_snappy.yaml"
+        ]
+    },
     "lexik/jwt-authentication-bundle": {
         "version": "3.1",
         "recipe": {
@@ -48,6 +73,31 @@
         },
         "files": [
             "./config/packages/lexik_jwt_authentication.yaml"
+        ]
+    },
+    "nelmio/api-doc-bundle": {
+        "version": "4.33",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "c8e0c38e1a280ab9e37587a8fa32b251d5bc1c94"
+        },
+        "files": [
+            "./config/packages/nelmio_api_doc.yaml",
+            "./config/routes/nelmio_api_doc.yaml"
+        ]
+    },
+    "nelmio/cors-bundle": {
+        "version": "2.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.5",
+            "ref": "6bea22e6c564fba3a1391615cada1437d0bde39c"
+        },
+        "files": [
+            "./config/packages/nelmio_cors.yaml"
         ]
     },
     "phpunit/phpunit": {
