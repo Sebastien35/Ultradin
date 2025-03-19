@@ -62,6 +62,20 @@ class MetricsSubscriber implements RequestMetricsCollectorInterface, TerminateMe
         }
     }
 
+
+
+    private function recordMemoryUsage(): void
+    {
+        $memoryUsage = memory_get_usage(true); // Utilisation mémoire en octets
+        $gauge = $this->collectionRegistry->getOrRegisterGauge(
+            $this->namespace,
+            'system_memory_usage_bytes',
+            'Memory usage in bytes',
+            []
+        );
+        $gauge->set($memoryUsage);
+    }
+
     // called on the `kernel.request` event
     public function collectRequest(RequestEvent $event): void
     {
@@ -75,6 +89,8 @@ class MetricsSubscriber implements RequestMetricsCollectorInterface, TerminateMe
         }
 
         $this->incRequestsTotal($requestMethod, $requestRoute);
+
+        $this->recordMemoryUsage();
     }
 
     // called on the `kernel.terminate` event
